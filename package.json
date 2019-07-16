@@ -1,0 +1,26 @@
+{
+  "name": "vgraph-wip",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "start": "parcel index.html --open",
+    "build": "parcel build index.html"
+  },
+  "dependencies": {
+    "@babel/plugin-proposal-class-properties": "7.4.4",
+    "canvas-text-wrapper": "0.10.2",
+    "eventemitter2": "5.0.1",
+    "meyda": "4.2.0",
+    "postcss-import-url": "^4.0.0",
+    "randomcolor": "0.5.4",
+    "uuid": "3.3.2"
+  },
+  "devDependencies": {
+    "@babel/core": "7.2.0",
+    "babel-preset-env": "^1.7.0",
+    "import-url": "^2.0.1",
+    "parcel-bundler": "^1.6.1"
+  },
+  "keywords": []
+}
