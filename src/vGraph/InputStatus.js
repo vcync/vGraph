@@ -13,6 +13,7 @@ function getInputCoords(e) {
 export default class InputStatus {
   constructor(vGraph, element = window) {
     this.vGraph = vGraph
+    this.element = element
 
     this.mousedownWatchers = {}
     this.mousemoveWatchers = {}
@@ -48,9 +49,9 @@ export default class InputStatus {
   destroy() {
     window.removeEventListener('keydown', this.keydown.bind(this))
     window.removeEventListener('keyup', this.keyup.bind(this))
-    element.removeEventListener('mousedown', this.mousedown.bind(this))
-    element.removeEventListener('mousemove', this.mousemove.bind(this))
-    element.removeEventListener('mouseup', this.mouseup.bind(this))
+    this.element.removeEventListener('mousedown', this.mousedown.bind(this))
+    this.element.removeEventListener('mousemove', this.mousemove.bind(this))
+    this.element.removeEventListener('mouseup', this.mouseup.bind(this))
   }
 
   resetValues() {
@@ -181,7 +182,7 @@ export default class InputStatus {
       this.metaPressed = true
     }
 
-    if (e.metaKey && keyCode !== 91 || keyCode !== 92) {
+    if ((e.metaKey && keyCode !== 91) || keyCode !== 92) {
       const index = this.heldWithMeta.indexOf(keyCode)
       if (index < 0) {
         this.heldWithMeta.push(keyCode)
@@ -218,7 +219,7 @@ export default class InputStatus {
     if (keyCode === 91 || keyCode === 92) {
       this.metaPressed = false
 
-      for(let i = 0; i < this.heldWithMeta.length; ++i) {
+      for (let i = 0; i < this.heldWithMeta.length; ++i) {
         const index = this.keysDown.indexOf(this.heldWithMeta[i])
         if (index < 0) {
           this.keysDown.splice(index, 1)

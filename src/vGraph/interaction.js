@@ -1,10 +1,14 @@
 import isIntersectRect from './util/is-intersect-rect'
 
 export default function interaction() {
-  this.inputStatus.watch('mousedown', '(Date.now() - lastDown) < 250 && button === 0', e => {
-    this.touchScaling = true
-    return 'touchscaling'
-  })
+  this.inputStatus.watch(
+    'mousedown',
+    '(Date.now() - lastDown) < 250 && button === 0',
+    e => {
+      this.touchScaling = true
+      return 'touchscaling'
+    }
+  )
 
   this.inputStatus.watch('mousemove', e => {
     const { point } = this.graphToEdit.hitpoints.hasIntersect(
@@ -27,10 +31,14 @@ export default function interaction() {
     this.setScale(unscaledDeltaY / 200)
   })
 
-  this.inputStatus.watch('mousemove', 'isDown && !shiftPressed && !action && button === 0', e => {
-    this.selectionDrawing = true
-    return 'selectiondrawing'
-  })
+  this.inputStatus.watch(
+    'mousemove',
+    'isDown && !shiftPressed && !action && button === 0',
+    e => {
+      this.selectionDrawing = true
+      return 'selectiondrawing'
+    }
+  )
 
   this.inputStatus.watch('mousemove', 'isDown && shiftPressed', e => {
     if (e.action === 'panning') {
@@ -72,23 +80,27 @@ export default function interaction() {
     }
   })
 
-  this.inputStatus.watch('mousemove', 'action === "linedrawing" && isDown', e => {
-    const { startPoint } = this
-    this.tooltip = startPoint.data.dataType
+  this.inputStatus.watch(
+    'mousemove',
+    'action === "linedrawing" && isDown',
+    e => {
+      const { startPoint } = this
+      this.tooltip = startPoint.data.dataType
 
-    const { point } = this.graphToEdit.hitpoints.hasIntersect(
-      'connector',
-      e.x,
-      e.y
-    )
+      const { point } = this.graphToEdit.hitpoints.hasIntersect(
+        'connector',
+        e.x,
+        e.y
+      )
 
-    if (startPoint && point && point.data.nodeId !== startPoint.data.nodeId) {
-      this.endPoint = point
-      this.tooltip = this.endPoint.data.dataType
-    } else {
-      this.endPoint = false
+      if (startPoint && point && point.data.nodeId !== startPoint.data.nodeId) {
+        this.endPoint = point
+        this.tooltip = this.endPoint.data.dataType
+      } else {
+        this.endPoint = false
+      }
     }
-  })
+  )
 
   this.inputStatus.watch('mousedown', '!action', e => {
     const { hitpoints, activeNodes, activeNodeDrawOrder } = this.graphToEdit
@@ -231,9 +243,11 @@ export default function interaction() {
 
   this.inputStatus.watch(
     'keydown',
-    'metaPressed && keysDown.indexOf(65) > -1 && !vGraph.widgetOverlay.contains(document.activeElement)', e => {
+    'metaPressed && keysDown.indexOf(65) > -1 && !vGraph.widgetOverlay.contains(document.activeElement)',
+    e => {
       e.event.preventDefault()
       this.focusedNodes = Object.values(this.graphToEdit.activeNodes)
       requestAnimationFrame(this.draw)
-  })
+    }
+  )
 }

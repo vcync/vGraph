@@ -53,8 +53,8 @@ export default {
       }
 
       context.save()
-      var sliceWidth = canvas.width / slicesX,
-        sliceHeight = canvas.height / slicesY
+      var sliceWidth = canvas.width / slicesX
+      var sliceHeight = canvas.height / slicesY
 
       scratchContext.clearRect(0, 0, canvas.width, canvas.height)
 

@@ -7,7 +7,7 @@ export default function recursiveNodeFind(menu, node) {
     return true
   } else if (menu.items.length > 0) {
     for (var i = 0; i < menu.items.length; i++) {
-      let menuItem = menu.items[i]
+      const menuItem = menu.items[i]
       if (!menuItem.node) continue
 
       if (menuItem.node === node) {

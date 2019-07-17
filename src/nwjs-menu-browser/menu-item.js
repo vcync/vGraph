@@ -1,3 +1,5 @@
+/* eslint-disable camelcase */
+
 import Menu from './menu'
 import isDescendant from './is-decendant'
 import { modifierSymbols } from './symbols'
@@ -9,7 +11,7 @@ class MenuItem extends EventEmitter2 {
 
     const modifiersEnum = ['cmd', 'command', 'super', 'shift', 'ctrl', 'alt']
     const typeEnum = ['separator', 'checkbox', 'normal']
-    let type = isValidType(settings.type) ? settings.type : 'normal'
+    const type = isValidType(settings.type) ? settings.type : 'normal'
     let submenu = settings.submenu || null
     let click = settings.click || null
     let modifiers = validModifiers(settings.modifiers)
@@ -40,7 +42,6 @@ class MenuItem extends EventEmitter2 {
         )
         if (!(inputMenu instanceof Menu)) {
           console.error('submenu must be an instance of Menu')
-          return
         } else {
           submenu = inputMenu
           submenu.parentMenuItem = this
@@ -55,7 +56,6 @@ class MenuItem extends EventEmitter2 {
       set: inputCallback => {
         if (typeof inputCallback !== 'function') {
           console.error('click must be a function')
-          return
         } else {
           click = inputCallback
         }
@@ -105,9 +105,9 @@ class MenuItem extends EventEmitter2 {
     }
 
     function validModifiers(modifiersIn = '') {
-      let modsArr = modifiersIn.split('+')
+      const modsArr = modifiersIn.split('+')
       for (let i = 0; i < modsArr; i++) {
-        let mod = modsArr[i].trim()
+        const mod = modsArr[i].trim()
         if (modifiersEnum.indexOf(mod) < 0) {
           console.error(`${mod} is not a valid modifier`)
           return false
@@ -200,7 +200,7 @@ class MenuItem extends EventEmitter2 {
   }
 
   buildItem(menuBarTopLevel = false, rebuild = false) {
-    let node = document.createElement('li')
+    const node = document.createElement('li')
     node.classList.add('menu-item', this.type)
 
     menuBarTopLevel = menuBarTopLevel || this.menuBarTopLevel || false
@@ -222,23 +222,23 @@ class MenuItem extends EventEmitter2 {
       })
     }
 
-    let iconWrapNode = document.createElement('div')
+    const iconWrapNode = document.createElement('div')
     iconWrapNode.classList.add('icon-wrap')
 
     if (this.icon) {
-      let iconNode = new Image()
+      const iconNode = new Image()
       iconNode.src = this.icon
       iconNode.classList.add('icon')
       iconWrapNode.appendChild(iconNode)
     }
 
-    let labelNode = document.createElement('div')
+    const labelNode = document.createElement('div')
     labelNode.classList.add('label')
 
-    let modifierNode = document.createElement('div')
+    const modifierNode = document.createElement('div')
     modifierNode.classList.add('modifiers')
 
-    let checkmarkNode = document.createElement('div')
+    const checkmarkNode = document.createElement('div')
     checkmarkNode.classList.add('checkmark')
 
     if (this.checked && !menuBarTopLevel) {
@@ -267,10 +267,10 @@ class MenuItem extends EventEmitter2 {
     }
 
     if (this.modifiers && !menuBarTopLevel) {
-      let mods = this.modifiers.split('+')
+      const mods = this.modifiers.split('+')
 
       // Looping this way to keep order of symbols - required by macOS
-      for (let symbol in modifierSymbols) {
+      for (const symbol in modifierSymbols) {
         if (mods.indexOf(symbol) > -1) {
           text += modifierSymbols[symbol]
         }
@@ -307,10 +307,10 @@ class MenuItem extends EventEmitter2 {
           }
 
           if (this.submenu) {
-            let parentNode = node.parentNode
+            const parentNode = node.parentNode
 
-            let x = parentNode.offsetWidth + parentNode.offsetLeft - 2
-            let y = parentNode.offsetTop + node.offsetTop - 4
+            const x = parentNode.offsetWidth + parentNode.offsetLeft - 2
+            const y = parentNode.offsetTop + node.offsetTop - 4
             this.submenu.popup(x, y, true, menuBarTopLevel)
             this.parentMenu.currentSubmenu = this.submenu
           }
@@ -320,7 +320,7 @@ class MenuItem extends EventEmitter2 {
 
     if (this.icon) labelNode.appendChild(iconWrapNode)
 
-    let textLabelNode = document.createElement('span')
+    const textLabelNode = document.createElement('span')
     textLabelNode.textContent = this.label
     textLabelNode.classList.add('label-text')
 
@@ -339,9 +339,7 @@ class MenuItem extends EventEmitter2 {
 
   rebuild() {
     if (!this.node && this.type !== 'separator') return
-    let newNode
-
-    newNode = this.buildItem(this.menuBarTopLevel, true)
+    const newNode = this.buildItem(this.menuBarTopLevel, true)
 
     if (this.node) {
       if (this.node.parentNode)

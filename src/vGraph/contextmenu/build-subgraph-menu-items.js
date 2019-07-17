@@ -3,7 +3,6 @@ import Node from '../Node'
 
 export default function buildSubgraphMenuItems(graph, x, y) {
   const { vGraph } = graph
-  const types = graph.vGraph.types
 
   return [
     new MenuItem({
