@@ -5,6 +5,7 @@ import isIntersectRect from './util/is-intersect-rect'
 
 export default class HitPoints {
   points = []
+
   groups = {}
 
   add(group, data, x1, y1, x2, y2) {

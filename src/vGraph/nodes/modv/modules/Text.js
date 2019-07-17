@@ -1,3 +1,4 @@
+/* globals CanvasTextWrapper */
 import 'canvas-text-wrapper'
 
 const textCanvas = document.createElement('canvas')

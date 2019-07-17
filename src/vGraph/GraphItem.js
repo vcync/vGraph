@@ -435,7 +435,9 @@ export default class GraphItem {
         name: key
       },
       x,
-      theme.node.padding * 2 * dpr + y + inputsLength * pointRadius * 2 * dpr * 2,
+      theme.node.padding * 2 * dpr +
+        y +
+        inputsLength * pointRadius * 2 * dpr * 2,
       pointRadius * dpr
     )
 
@@ -508,7 +510,9 @@ export default class GraphItem {
         dataType: value.type
       },
       x + this.width * dpr + theme.node.padding * 2 * dpr,
-      theme.node.padding * dpr * 2 + y + outputsLength * pointRadius * 2 * dpr * 2,
+      theme.node.padding * dpr * 2 +
+        y +
+        outputsLength * pointRadius * 2 * dpr * 2,
       pointRadius * dpr
     )
 

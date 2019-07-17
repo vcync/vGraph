@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import MenuItem from './menu-item'
 import recursiveNodeFind from './recursive-node-find'
 
@@ -32,7 +33,7 @@ class Menu {
         return false
       }
       item.parentMenu = this
-      let index = items.push(item)
+      const index = items.push(item)
       this.rebuild()
       return index
     }
@@ -55,7 +56,7 @@ class Menu {
         return false
       }
 
-      let index = items.indexOf(item)
+      const index = items.indexOf(item)
       if (index < 0) {
         console.error('item to be removed was not found in this.items')
         return false
@@ -148,13 +149,13 @@ class Menu {
       }
     })
 
-    let width = menuNode.clientWidth
-    let height = menuNode.clientHeight
+    const width = menuNode.clientWidth
+    const height = menuNode.clientHeight
 
     if (x + width > window.innerWidth) {
       setRight = true
       if (submenu) {
-        let node = this.parentMenu.node
+        const node = this.parentMenu.node
         x =
           node.offsetWidth +
           (window.innerWidth - node.offsetLeft - node.offsetWidth) -
@@ -226,11 +227,10 @@ class Menu {
 
   popdownAll() {
     this.topmostMenu.popdown(true)
-    return
   }
 
   buildMenu(submenu = false, menubarSubmenu = false) {
-    let menuNode = this.menuNode
+    const menuNode = this.menuNode
     if (submenu) {
       menuNode.classList.add('submenu')
     }
@@ -289,7 +289,7 @@ class Menu {
   }
 
   get menuNode() {
-    let node = document.createElement('ul')
+    const node = document.createElement('ul')
     node.classList.add('nwjs-menu', this.type)
     return node
   }
@@ -323,8 +323,8 @@ class Menu {
   }
 
   clearActiveSubmenuStyling(notThisNode) {
-    let submenuActive = this.node.querySelectorAll('.submenu-active')
-    for (let node of submenuActive) {
+    const submenuActive = this.node.querySelectorAll('.submenu-active')
+    for (const node of submenuActive) {
       if (node === notThisNode) {
         continue
       }

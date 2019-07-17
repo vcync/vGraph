@@ -53,6 +53,7 @@ let meyda
   gainNode.connect(audioContext.destination)
 
   // Set up Meyda
+  // eslint-disable-next-line
   meyda = new Meyda.createMeydaAnalyzer({
     audioContext,
     source: audioStream,
