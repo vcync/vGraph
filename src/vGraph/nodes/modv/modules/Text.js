@@ -1,5 +1,4 @@
-/* globals CanvasTextWrapper */
-import "canvas-text-wrapper";
+import { CanvasTextWrapper } from "canvas-text-wrapper";
 
 const textCanvas = document.createElement("canvas");
 const textContext = textCanvas.getContext("2d");

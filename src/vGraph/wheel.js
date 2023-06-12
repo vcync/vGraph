@@ -1,8 +1,8 @@
 export default function wheel(e) {
   const { mouseDown, draw } = this;
   if (
-    mouseDown ||
-    e.target !== this.widgetOverlay ||
+    mouseDown &&
+    e.target !== this.widgetOverlay &&
     e.target !== this.canvas
   ) {
     return;

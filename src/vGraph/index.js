@@ -28,25 +28,18 @@ if (hasDom) {
   rEl = window.addEventListener;
 }
 
-export default class vGraph {
+export class vGraph {
   _hasDom = hasDom;
 
   resize = resize.bind(this);
-
   draw = draw.bind(this);
-
   wheel = wheel.bind(this);
-
   keydown = keydown.bind(this);
-
   keyup = keyup.bind(this);
-
   dblclick = dblclick.bind(this);
-
   contextmenu = contextmenu.bind(this);
 
   hitpoints = new HitPoints();
-
   ecosystemTheme = new Theme();
 
   constructor(context = createCanvas(128, 128), theme = defaultTheme) {
@@ -475,11 +468,15 @@ export default class vGraph {
 
   deleteNodeById(nodeId) {
     if (Array.isArray(nodeId)) {
-      nodeId.forEach(node => this.deleteNodeById(nodeId));
+      nodeId.forEach(id => this.deleteNodeById(id));
       return;
     }
 
-    this.deleteNode(this.activeNodes[nodeId]);
+    this.deleteNode(this.graph.activeNodes[nodeId]);
+  }
+
+  reset() {
+    this.deleteNodeById(Object.keys(this.graph.activeNodes));
   }
 
   toJSON() {

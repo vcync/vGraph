@@ -1,4 +1,4 @@
-export default function makeObjectWithLength(
+export function makeObjectWithLength(
   obj = {},
   enumerable = false,
   varName = "$length"
