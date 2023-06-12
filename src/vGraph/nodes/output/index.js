@@ -1,3 +1,3 @@
-import ValueDisplay from './ValueDisplay'
+import ValueDisplay from "./ValueDisplay";
 
-export default [ValueDisplay]
+export default [ValueDisplay];

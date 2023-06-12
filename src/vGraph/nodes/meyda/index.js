@@ -1,56 +1,56 @@
-import Meyda from 'meyda'
+import Meyda from "meyda";
 
-let meyda
-;(async () => {
-  const isSafari = navigator.vendor === 'Apple Computer, Inc.'
-  console.log(isSafari)
+let meyda;
+(async () => {
+  const isSafari = navigator.vendor === "Apple Computer, Inc.";
+  console.log(isSafari);
 
-  const AudioContext = window.AudioContext || window.webkitAudioContext
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
 
-  let mediaStream
+  let mediaStream;
 
   if (!isSafari) {
     mediaStream = await navigator.mediaDevices.getUserMedia({
       audio: {
         echoCancellation: { exact: false }
       }
-    })
+    });
   } else {
     mediaStream = await navigator.mediaDevices.getUserMedia({
       audio: true
-    })
+    });
   }
 
   // Create new Audio Context
-  let audioContext
+  let audioContext;
   if (!isSafari) {
     audioContext = new AudioContext({
-      latencyHint: 'playback'
-    })
+      latencyHint: "playback"
+    });
   } else {
-    audioContext = new AudioContext()
+    audioContext = new AudioContext();
   }
 
   // Create new Audio Analyser
-  const analyserNode = audioContext.createAnalyser()
+  const analyserNode = audioContext.createAnalyser();
 
   // Create a gain node
-  const gainNode = audioContext.createGain()
+  const gainNode = audioContext.createGain();
 
   // Mute the node
-  gainNode.gain.value = 0
+  gainNode.gain.value = 0;
 
   // Create the audio input stream (audio)
-  const audioStream = audioContext.createMediaStreamSource(mediaStream)
+  const audioStream = audioContext.createMediaStreamSource(mediaStream);
 
   // Connect the audio stream to the analyser (this is a passthru) (audio->(analyser))
-  audioStream.connect(analyserNode)
+  audioStream.connect(analyserNode);
 
   // Connect the audio stream to the gain node (audio->(analyser)->gain)
-  audioStream.connect(gainNode)
+  audioStream.connect(gainNode);
 
   // Connect the gain node to the output (audio->(analyser)->gain->destination)
-  gainNode.connect(audioContext.destination)
+  gainNode.connect(audioContext.destination);
 
   // Set up Meyda
   // eslint-disable-next-line
@@ -58,67 +58,67 @@ let meyda
     audioContext,
     source: audioStream,
     bufferSize: 512,
-    windowingFunction: 'rect',
-    featureExtractors: ['rms', 'energy', 'zcr']
-  })
-})()
+    windowingFunction: "rect",
+    featureExtractors: ["rms", "energy", "zcr"]
+  });
+})();
 
-let lastFrameId = 0
-let features = {}
+let lastFrameId = 0;
+let features = {};
 
 function getFeatures(delta) {
   if (delta !== lastFrameId) {
-    features = meyda.get()
+    features = meyda.get();
   }
-  lastFrameId = delta
+  lastFrameId = delta;
 }
 
 export default [
   {
-    name: 'meyda/energy',
-    group: 'audio/meyda',
-    description: 'The Energy of the audio stream',
+    name: "meyda/energy",
+    group: "audio/meyda",
+    description: "The Energy of the audio stream",
     outputs: {
       energy: {
-        type: 'number',
+        type: "number",
         default: 0
       }
     },
     exec({ inputs, outputs, delta }) {
-      getFeatures(delta)
-      outputs['energy'].value = features.energy
+      getFeatures(delta);
+      outputs["energy"].value = features.energy;
     }
   },
 
   {
-    name: 'meyda/rms',
-    group: 'audio/meyda',
-    description: 'The RMS of the audio stream',
+    name: "meyda/rms",
+    group: "audio/meyda",
+    description: "The RMS of the audio stream",
     outputs: {
       rms: {
-        type: 'number',
+        type: "number",
         default: 0
       }
     },
     exec({ inputs, outputs, delta }) {
-      getFeatures(delta)
-      outputs['rms'].value = features.rms
+      getFeatures(delta);
+      outputs["rms"].value = features.rms;
     }
   },
 
   {
-    name: 'meyda/zcr',
-    group: 'audio/meyda',
-    description: 'The ZCR of the audio stream',
+    name: "meyda/zcr",
+    group: "audio/meyda",
+    description: "The ZCR of the audio stream",
     outputs: {
       zcr: {
-        type: 'number',
+        type: "number",
         default: 0
       }
     },
     exec({ inputs, outputs, delta }) {
-      getFeatures(delta)
-      outputs['zcr'].value = features.zcr
+      getFeatures(delta);
+      outputs["zcr"].value = features.zcr;
     }
   }
-]
+];

@@ -1,35 +1,35 @@
 export default {
-  name: 'modV/module/squishy',
-  group: 'modV/module',
-  title: 'Squishy',
+  name: "modV/module/squishy",
+  group: "modV/module",
+  title: "Squishy",
   inputs: {
     context: {
-      type: 'renderContext',
+      type: "renderContext",
       connectionRequired: true,
       default: undefined
     },
     intensity: {
-      type: 'number',
+      type: "number",
       default: 1
     }
   },
   outputs: {
     context: {
-      type: 'renderContext',
+      type: "renderContext",
       connectionRequired: true,
       default: undefined
     }
   },
   exec({ inputs, outputs }) {
-    const renderContext = inputs.context.value
-    const intensity = inputs.intensity.value
+    const renderContext = inputs.context.value;
+    const intensity = inputs.intensity.value;
 
     if (!renderContext) {
-      return
+      return;
     }
 
-    const { canvas, context, delta } = renderContext
-    const { width, height } = canvas
+    const { canvas, context, delta } = renderContext;
+    const { width, height } = canvas;
     context.drawImage(
       canvas,
       Math.cos(delta / (900 * intensity)) * 5 +
@@ -45,8 +45,8 @@ export default {
           Math.cos(
             delta / (600 * intensity) + 2 * Math.sin(delta / (500 * intensity))
           )
-    )
+    );
 
-    outputs.context.value = renderContext
+    outputs.context.value = renderContext;
   }
-}
+};

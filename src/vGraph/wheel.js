@@ -1,17 +1,17 @@
 export default function wheel(e) {
-  const { mouseDown, draw } = this
+  const { mouseDown, draw } = this;
   if (
     mouseDown ||
     e.target !== this.widgetOverlay ||
     e.target !== this.canvas
   ) {
-    return
+    return;
   }
 
-  e.preventDefault()
+  e.preventDefault();
 
-  const deltaScale = e.deltaY / 1000
-  this.setScale(deltaScale)
+  const deltaScale = e.deltaY / 1000;
+  this.setScale(deltaScale);
 
-  requestAnimationFrame(draw)
+  requestAnimationFrame(draw);
 }

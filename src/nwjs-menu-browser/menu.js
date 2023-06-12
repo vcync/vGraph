@@ -1,352 +1,352 @@
 /* eslint-disable camelcase */
-import MenuItem from './menu-item'
-import recursiveNodeFind from './recursive-node-find'
+import MenuItem from "./menu-item";
+import recursiveNodeFind from "./recursive-node-find";
 
 class Menu {
   constructor(settings = {}) {
-    this._showTimer = null
-    const typeEnum = ['contextmenu', 'menubar']
-    const items = []
-    let type = isValidType(settings.type) ? settings.type : 'contextmenu'
+    this._showTimer = null;
+    const typeEnum = ["contextmenu", "menubar"];
+    const items = [];
+    let type = isValidType(settings.type) ? settings.type : "contextmenu";
 
-    Object.defineProperty(this, 'items', {
+    Object.defineProperty(this, "items", {
       get: () => {
-        return items
+        return items;
       }
-    })
+    });
 
-    Object.defineProperty(this, 'type', {
+    Object.defineProperty(this, "type", {
       get: () => {
-        return type
+        return type;
       },
       set: typeIn => {
-        type = isValidType(typeIn) ? typeIn : type
+        type = isValidType(typeIn) ? typeIn : type;
       }
-    })
+    });
 
-    this.x = 0
-    this.y = 0
+    this.x = 0;
+    this.y = 0;
 
     this.append = item => {
       if (!(item instanceof MenuItem)) {
-        console.error('appended item must be an instance of MenuItem')
-        return false
+        console.error("appended item must be an instance of MenuItem");
+        return false;
       }
-      item.parentMenu = this
-      const index = items.push(item)
-      this.rebuild()
-      return index
-    }
+      item.parentMenu = this;
+      const index = items.push(item);
+      this.rebuild();
+      return index;
+    };
 
     this.insert = (item, index) => {
       if (!(item instanceof MenuItem)) {
-        console.error('inserted item must be an instance of MenuItem')
-        return false
+        console.error("inserted item must be an instance of MenuItem");
+        return false;
       }
 
-      items.splice(index, 0, item)
-      item.parentMenu = this
-      this.rebuild()
-      return true
-    }
+      items.splice(index, 0, item);
+      item.parentMenu = this;
+      this.rebuild();
+      return true;
+    };
 
     this.remove = item => {
       if (!(item instanceof MenuItem)) {
-        console.error('item to be removed is not an instance of MenuItem')
-        return false
+        console.error("item to be removed is not an instance of MenuItem");
+        return false;
       }
 
-      const index = items.indexOf(item)
+      const index = items.indexOf(item);
       if (index < 0) {
-        console.error('item to be removed was not found in this.items')
-        return false
+        console.error("item to be removed was not found in this.items");
+        return false;
       } else {
-        items.splice(index, 0)
-        this.rebuild()
-        return true
+        items.splice(index, 0);
+        this.rebuild();
+        return true;
       }
-    }
+    };
 
     this.removeAt = index => {
-      items.splice(index, 1)
-      this.rebuild()
-      return true
-    }
+      items.splice(index, 1);
+      this.rebuild();
+      return true;
+    };
 
-    this.node = null
-    this.clickHandler = this._clickHandle_hideMenu.bind(this)
-    this.currentSubmenu = null
-    this.parentMenuItem = null
+    this.node = null;
+    this.clickHandler = this._clickHandle_hideMenu.bind(this);
+    this.currentSubmenu = null;
+    this.parentMenuItem = null;
 
-    function isValidType(typeIn = '', debug = false) {
+    function isValidType(typeIn = "", debug = false) {
       if (typeEnum.indexOf(typeIn) < 0) {
-        if (debug) console.error(`${typeIn} is not a valid type`)
-        return false
+        if (debug) console.error(`${typeIn} is not a valid type`);
+        return false;
       }
-      return true
+      return true;
     }
 
-    if (this.type === 'menubar') {
-      document.addEventListener('click', this.clickHandler)
+    if (this.type === "menubar") {
+      document.addEventListener("click", this.clickHandler);
     }
   }
 
   _clickHandle_hideMenu(e) {
     if (!this.isNodeInChildMenuTree(e.target)) {
-      if (this.node.classList.contains('show') || this.type === 'menubar')
-        this.popdown()
+      if (this.node.classList.contains("show") || this.type === "menubar")
+        this.popdown();
     }
   }
 
   createMacBuiltin() {
-    console.error('This method is not available in browser :(')
-    return false
+    console.error("This method is not available in browser :(");
+    return false;
   }
 
   destroy() {
     this.items.forEach(item => {
-      item.destroy()
-    })
+      item.destroy();
+    });
 
     if (this.node) {
-      this.node.remove()
+      this.node.remove();
     }
   }
 
   popup(x, y, submenu = false, menubarSubmenu = false) {
-    this.x = x
-    this.y = y
-    let menuNode
-    let setRight = false
+    this.x = x;
+    this.y = y;
+    let menuNode;
+    let setRight = false;
 
-    submenu = submenu || this.submenu
-    this.submenu = menubarSubmenu
+    submenu = submenu || this.submenu;
+    this.submenu = menubarSubmenu;
 
     if (!submenu) {
-      window.addEventListener('mouseup', this.mouseup.bind(this))
+      window.addEventListener("mouseup", this.mouseup.bind(this));
     }
 
-    menubarSubmenu = menubarSubmenu || this.menubarSubmenu
-    this.menubarSubmenu = menubarSubmenu
+    menubarSubmenu = menubarSubmenu || this.menubarSubmenu;
+    this.menubarSubmenu = menubarSubmenu;
 
     if (this.node) {
-      menuNode = this.node
+      menuNode = this.node;
     } else {
-      menuNode = this.buildMenu(submenu, menubarSubmenu)
-      this.node = menuNode
+      menuNode = this.buildMenu(submenu, menubarSubmenu);
+      this.node = menuNode;
     }
 
-    menuNode.classList.remove('popdown')
-    menuNode.classList.remove('final-popdown')
-    menuNode.classList.remove('selected')
+    menuNode.classList.remove("popdown");
+    menuNode.classList.remove("final-popdown");
+    menuNode.classList.remove("selected");
 
     this.items.forEach(item => {
-      item.node.classList.remove('selected')
+      item.node.classList.remove("selected");
 
       if (item.submenu) {
-        item.node.classList.remove('submenu-active')
-        item.submenu.popdown()
+        item.node.classList.remove("submenu-active");
+        item.submenu.popdown();
       }
-    })
+    });
 
-    const width = menuNode.clientWidth
-    const height = menuNode.clientHeight
+    const width = menuNode.clientWidth;
+    const height = menuNode.clientHeight;
 
     if (x + width > window.innerWidth) {
-      setRight = true
+      setRight = true;
       if (submenu) {
-        const node = this.parentMenu.node
+        const node = this.parentMenu.node;
         x =
           node.offsetWidth +
           (window.innerWidth - node.offsetLeft - node.offsetWidth) -
-          2
+          2;
       } else {
-        x = 0
+        x = 0;
       }
     }
 
     if (y + height > window.innerHeight) {
-      y = window.innerHeight - height
+      y = window.innerHeight - height;
     }
 
     if (!setRight) {
-      menuNode.style.left = x + 'px'
-      menuNode.style.right = 'auto'
+      menuNode.style.left = x + "px";
+      menuNode.style.right = "auto";
     } else {
-      menuNode.style.right = x + 'px'
-      menuNode.style.left = 'auto'
+      menuNode.style.right = x + "px";
+      menuNode.style.left = "auto";
     }
 
-    menuNode.style.top = y + 'px'
+    menuNode.style.top = y + "px";
 
     if (!submenu) {
-      document.addEventListener('click', this.clickHandler)
+      document.addEventListener("click", this.clickHandler);
     }
 
     if (this.node) {
       if (this.node.parentNode && menuNode !== this.node) {
-        this.node.parentNode.replaceChild(menuNode, this.node)
+        this.node.parentNode.replaceChild(menuNode, this.node);
       } else {
-        document.body.appendChild(this.node)
+        document.body.appendChild(this.node);
       }
     } else {
-      document.body.appendChild(menuNode)
+      document.body.appendChild(menuNode);
     }
 
     this._showTimer = setTimeout(() => {
-      this.node.classList.add('show')
-    }, 16.666666667)
+      this.node.classList.add("show");
+    }, 16.666666667);
   }
 
   popdown(finalPopdown) {
     if (this._showTimer) {
-      clearTimeout(this._showTimer)
-      this._showTimer = null
+      clearTimeout(this._showTimer);
+      this._showTimer = null;
     }
 
     if (this.node) {
       if (finalPopdown) {
-        this.node.classList.add('final-popdown')
+        this.node.classList.add("final-popdown");
       }
 
-      this.node.classList.remove('show')
+      this.node.classList.remove("show");
     }
-    if (this.type !== 'menubar')
-      document.removeEventListener('click', this.clickHandler)
+    if (this.type !== "menubar")
+      document.removeEventListener("click", this.clickHandler);
 
-    if (this.type === 'menubar') {
-      this.clearActiveSubmenuStyling()
+    if (this.type === "menubar") {
+      this.clearActiveSubmenuStyling();
     }
 
     this.items.forEach(item => {
       if (item.submenu) {
-        item.submenu.popdown(finalPopdown)
+        item.submenu.popdown(finalPopdown);
       }
-    })
+    });
   }
 
   popdownAll() {
-    this.topmostMenu.popdown(true)
+    this.topmostMenu.popdown(true);
   }
 
   buildMenu(submenu = false, menubarSubmenu = false) {
-    const menuNode = this.menuNode
+    const menuNode = this.menuNode;
     if (submenu) {
-      menuNode.classList.add('submenu')
+      menuNode.classList.add("submenu");
     }
 
     if (menubarSubmenu) {
-      menuNode.classList.add('menubar-submenu')
+      menuNode.classList.add("menubar-submenu");
     }
 
     this.items.forEach(item => {
-      let itemNode
-      if (this.type === 'menubar') {
-        itemNode = item.buildItem(true)
+      let itemNode;
+      if (this.type === "menubar") {
+        itemNode = item.buildItem(true);
       } else {
-        itemNode = item.buildItem()
+        itemNode = item.buildItem();
       }
 
-      item.on('click', () => {
-        menuNode.classList.add('selected')
+      item.on("click", () => {
+        menuNode.classList.add("selected");
 
-        let menu = this
+        let menu = this;
 
         while (menu.parentMenu) {
           if (menu.parentMenu) {
-            menu.parentMenu.node.classList.add('selected')
-            menu = menu.parentMenu
+            menu.parentMenu.node.classList.add("selected");
+            menu = menu.parentMenu;
           }
         }
-      })
+      });
 
-      menuNode.appendChild(itemNode)
-    })
-    return menuNode
+      menuNode.appendChild(itemNode);
+    });
+    return menuNode;
   }
 
   rebuild() {
-    if (!this.node && this.type !== 'menubar') {
-      return
+    if (!this.node && this.type !== "menubar") {
+      return;
     }
 
-    let newNode
+    let newNode;
 
-    if (this.type === 'menubar') {
-      newNode = this.buildMenu()
+    if (this.type === "menubar") {
+      newNode = this.buildMenu();
     } else {
-      newNode = this.buildMenu(this.submenu, this.menubarSubmenu)
+      newNode = this.buildMenu(this.submenu, this.menubarSubmenu);
     }
 
     if (this.node) {
       if (this.node.parentNode)
-        this.node.parentNode.replaceChild(newNode, this.node)
+        this.node.parentNode.replaceChild(newNode, this.node);
     } else {
-      document.body.appendChild(newNode)
+      document.body.appendChild(newNode);
     }
 
-    this.node = newNode
+    this.node = newNode;
   }
 
   get menuNode() {
-    const node = document.createElement('ul')
-    node.classList.add('nwjs-menu', this.type)
-    return node
+    const node = document.createElement("ul");
+    node.classList.add("nwjs-menu", this.type);
+    return node;
   }
 
   get parentMenu() {
     if (this.parentMenuItem) {
-      return this.parentMenuItem.parentMenu
+      return this.parentMenuItem.parentMenu;
     } else {
-      return undefined
+      return undefined;
     }
   }
 
   get hasActiveSubmenu() {
-    if (this.node.querySelector('.submenu-active')) {
-      return true
+    if (this.node.querySelector(".submenu-active")) {
+      return true;
     } else {
-      return false
+      return false;
     }
   }
 
   get topmostMenu() {
-    let menu = this
+    let menu = this;
 
     while (menu.parentMenu) {
       if (menu.parentMenu) {
-        menu = menu.parentMenu
+        menu = menu.parentMenu;
       }
     }
 
-    return menu
+    return menu;
   }
 
   clearActiveSubmenuStyling(notThisNode) {
-    const submenuActive = this.node.querySelectorAll('.submenu-active')
+    const submenuActive = this.node.querySelectorAll(".submenu-active");
     for (const node of submenuActive) {
       if (node === notThisNode) {
-        continue
+        continue;
       }
 
-      node.classList.remove('submenu-active')
+      node.classList.remove("submenu-active");
     }
   }
 
   isNodeInChildMenuTree(node = false) {
     if (!node) {
-      return false
+      return false;
     }
 
-    return recursiveNodeFind(this, node)
+    return recursiveNodeFind(this, node);
   }
 
   mouseup(e) {
-    window.removeEventListener('mouseup', this.mouseup.bind(this))
+    window.removeEventListener("mouseup", this.mouseup.bind(this));
     if (e.clientX !== this.x || e.clientY !== this.y) {
-      this.popdownAll(true)
+      this.popdownAll(true);
     }
   }
 }
 
-export default Menu
+export default Menu;

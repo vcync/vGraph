@@ -1,101 +1,101 @@
 export default [
   {
-    name: 'math/operation/add',
-    group: 'math/operation',
-    description: 'Adds two numbers',
+    name: "math/operation/add",
+    group: "math/operation",
+    description: "Adds two numbers",
     inputs: {
       a: {
-        type: 'number',
+        type: "number",
         default: 0
       },
       b: {
-        type: 'number',
+        type: "number",
         default: 0
       }
     },
     outputs: {
-      'a+b': {
-        type: 'number',
+      "a+b": {
+        type: "number",
         default: 0
       }
     },
     exec({ inputs, outputs }) {
-      outputs['a+b'].value = inputs.a.value + inputs.b.value
+      outputs["a+b"].value = inputs.a.value + inputs.b.value;
     }
   },
 
   {
-    name: 'math/operation/subtract',
-    group: 'math/operation',
-    description: 'Subtracts two numbers',
+    name: "math/operation/subtract",
+    group: "math/operation",
+    description: "Subtracts two numbers",
     inputs: {
       a: {
-        type: 'number',
+        type: "number",
         default: 0
       },
       b: {
-        type: 'number',
+        type: "number",
         default: 0
       }
     },
     outputs: {
-      'a-b': {
-        type: 'number',
+      "a-b": {
+        type: "number",
         default: 0
       }
     },
     exec({ inputs, outputs }) {
-      outputs['a-b'].value = inputs.a.value - inputs.b.value
+      outputs["a-b"].value = inputs.a.value - inputs.b.value;
     }
   },
 
   {
-    name: 'math/operation/multiply',
-    group: 'math/operation',
-    description: 'Multiplies two numbers',
+    name: "math/operation/multiply",
+    group: "math/operation",
+    description: "Multiplies two numbers",
     inputs: {
       a: {
-        type: 'number',
+        type: "number",
         default: 0
       },
       b: {
-        type: 'number',
+        type: "number",
         default: 0
       }
     },
     outputs: {
-      'a×b': {
-        type: 'number',
+      "a×b": {
+        type: "number",
         default: 0
       }
     },
     exec({ inputs, outputs }) {
-      outputs['a×b'].value = inputs.a.value * inputs.b.value
+      outputs["a×b"].value = inputs.a.value * inputs.b.value;
     }
   },
 
   {
-    name: 'math/operation/divide',
-    group: 'math/operation',
-    description: 'Divides two numbers',
+    name: "math/operation/divide",
+    group: "math/operation",
+    description: "Divides two numbers",
     inputs: {
       a: {
-        type: 'number',
+        type: "number",
         default: 0
       },
       b: {
-        type: 'number',
+        type: "number",
         default: 0
       }
     },
     outputs: {
-      'a÷b': {
-        type: 'number',
+      "a÷b": {
+        type: "number",
         default: 0
       }
     },
     exec({ inputs, outputs }) {
-      outputs['a÷b'].value = inputs.a.value / inputs.b.value
+      outputs["a÷b"].value = inputs.a.value / inputs.b.value;
     }
   }
-]
+];

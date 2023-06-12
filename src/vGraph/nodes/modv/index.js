@@ -1,4 +1,4 @@
-import ContextJoiner from './ContextJoiner'
-import ContextSplitter from './ContextSplitter'
+import ContextJoiner from "./ContextJoiner";
+import ContextSplitter from "./ContextSplitter";
 
-export default [ContextJoiner, ContextSplitter]
+export default [ContextJoiner, ContextSplitter];

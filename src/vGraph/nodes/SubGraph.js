@@ -1,9 +1,9 @@
 export default [
   {
-    name: 'SubGraph',
+    name: "SubGraph",
     isSubgraph: true,
     inputs: {},
     outputs: {},
     exec({ inputs, outputs }) {}
   }
-]
+];
