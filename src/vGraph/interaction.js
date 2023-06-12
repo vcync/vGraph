@@ -40,26 +40,30 @@ export default function interaction() {
     }
   );
 
-  this.inputStatus.watch("mousemove", "isDown && shiftPressed", e => {
-    if (e.action === "panning") {
-      const {
-        dpr,
-        canvas: { width, height },
-        scale
-      } = this;
+  this.inputStatus.watch(
+    "mousemove",
+    "(button === 0 && isDown && shiftPressed) || (button === 1 && isDown)",
+    e => {
+      if (e.action === "panning") {
+        const {
+          dpr,
+          canvas: { width, height },
+          scale
+        } = this;
 
-      this.scaleOffsetX += (e.deltaX / width) * scale;
-      this.scaleOffsetY += (e.deltaY / height) * scale;
+        this.scaleOffsetX += (e.deltaX / width) * scale;
+        this.scaleOffsetY += (e.deltaY / height) * scale;
 
-      const x = (e.unscaledX * dpr - this.scaleOffsetX * width) / scale;
-      const y = (e.unscaledY * dpr - this.scaleOffsetY * height) / scale;
+        const x = (e.unscaledX * dpr - this.scaleOffsetX * width) / scale;
+        const y = (e.unscaledY * dpr - this.scaleOffsetY * height) / scale;
 
-      this.inputStatus.x = x;
-      this.inputStatus.y = y;
-    } else if (!e.action) {
-      return "panning";
+        this.inputStatus.x = x;
+        this.inputStatus.y = y;
+      } else if (!e.action) {
+        return "panning";
+      }
     }
-  });
+  );
 
   this.inputStatus.watch("mousedown", "!action && button === 0", e => {
     const { point } = this.graphToEdit.hitpoints.hasIntersect(

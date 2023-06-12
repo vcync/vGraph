@@ -1,4 +1,4 @@
-import Node from "./Node";
+import { Node } from "./Node";
 import HitPoints from "./HitPoints";
 import Graph from "./Graph";
 

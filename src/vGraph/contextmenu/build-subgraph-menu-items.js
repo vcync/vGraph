@@ -1,5 +1,5 @@
 import { MenuItem } from "../../nwjs-menu-browser";
-import Node from "../Node";
+import { Node } from "../Node";
 
 export default function buildSubgraphMenuItems(graph, x, y) {
   const { vGraph } = graph;

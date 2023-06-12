@@ -80,7 +80,6 @@ export default class GraphItem {
     this.x = x;
     this.y = y;
     this.itemHitpoints = [];
-    this._inputsDirty = 0;
 
     if (options.exec) {
       this.exec = options.exec;

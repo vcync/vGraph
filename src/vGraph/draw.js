@@ -32,10 +32,12 @@ export default function draw() {
   context.fillRect(0, 0, width, height);
   context.globalAlpha = 1;
 
+  context.font = `${14 * dpr}px ${theme.font}`;
+  context.fillStyle = theme.tooltip.textColor;
+
   context.save();
   context.translate(scaleOffsetX * width, scaleOffsetY * height);
   context.scale(scale, scale);
-  context.font = `${14 * dpr}px ${theme.font}`;
 
   context.save();
   context.lineCap = "round";
@@ -155,8 +157,10 @@ export default function draw() {
     if (!node) {
       widget.style.display = "none";
     } else {
-      widget.style.top = `${node.y / dpr + (scaleOffsetY * height) / scale}px`;
-      widget.style.left = `${node.x / dpr + (scaleOffsetX * width) / scale}px`;
+      widget.style.top = `${(node.y + (scaleOffsetY * height) / scale) /
+        dpr}px`;
+      widget.style.left = `${(node.x + (scaleOffsetX * width) / scale) /
+        dpr}px`;
       widget.style.display = "block";
     }
   }
@@ -170,18 +174,6 @@ export default function draw() {
       this.inputStatus.y + 16 * dpr
     );
   }
-
-  context.save();
-  context.translate(-scaleOffsetX * width, -scaleOffsetY * height);
-  let graphPath = "Main ";
-  let currentGraph = graphToEdit;
-  while (currentGraph.parent) {
-    graphPath += `> ${graphToEdit.name} `;
-    currentGraph = currentGraph.parent;
-  }
-
-  context.fillText(`Path: ${graphPath}`, 10 * dpr, 42 * dpr, width);
-  context.restore();
 
   if (this.debug.hitpoints) {
     context.strokeStyle = "red";
@@ -213,4 +205,14 @@ export default function draw() {
       );
     }
   }
+
+  context.restore();
+  let graphPath = "Main ";
+  let currentGraph = graphToEdit;
+  while (currentGraph.parent) {
+    graphPath += `> ${graphToEdit.name} `;
+    currentGraph = currentGraph.parent;
+  }
+
+  context.fillText(`Path: ${graphPath}`, 10 * dpr, 42 * dpr, width);
 }

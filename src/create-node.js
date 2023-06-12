@@ -10,10 +10,12 @@ export default function createNode(name, x, y) {
     id: uuid4(),
     inputs: {},
     outputs: {},
-    width: 150,
-    height: 50,
+
     title: existingNode.title,
     name,
+
+    width: 150,
+    height: 50,
     x,
     y
   };

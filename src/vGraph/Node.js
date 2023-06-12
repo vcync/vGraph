@@ -1,6 +1,6 @@
 import GraphItem from "./GraphItem";
 
-export default class Node extends GraphItem {
+export class Node extends GraphItem {
   constructor(graph, x, y, options, id) {
     super(graph, x, y, options, id);
 

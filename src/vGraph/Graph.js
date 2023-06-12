@@ -1,6 +1,6 @@
-import makeObjectWithLength from "./util/make-object-with-length";
+import { makeObjectWithLength } from "./util/make-object-with-length";
 
-import Node from "./Node";
+import { Node } from "./Node";
 import SubGraph from "./SubGraph";
 import HitPoints from "./HitPoints";
 
