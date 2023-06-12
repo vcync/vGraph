@@ -1,9 +1,9 @@
-import uuid4 from 'uuid/v4'
+import uuid4 from "uuid/v4";
 
 export default function createNode(name, x, y) {
-  const existingNode = this.availableNodes.find(node => node.name === name)
+  const existingNode = this.availableNodes.find(node => node.name === name);
   if (!existingNode) {
-    throw Error(`Cannot find a registered node with the name "${name}"`)
+    throw Error(`Cannot find a registered node with the name "${name}"`);
   }
 
   const newNode = {
@@ -16,31 +16,31 @@ export default function createNode(name, x, y) {
     name,
     x,
     y
-  }
+  };
 
   if (existingNode.inputs) {
-    const inputs = Object.keys(existingNode.inputs)
-    const inputsLength = inputs.length
+    const inputs = Object.keys(existingNode.inputs);
+    const inputsLength = inputs.length;
 
     for (let i = 0; i < inputsLength; ++i) {
-      const key = inputs[i]
-      const value = existingNode.inputs[key]
+      const key = inputs[i];
+      const value = existingNode.inputs[key];
 
       newNode.inputs[key] = {
         id: uuid4(),
         label: value.label,
         type: value.type
-      }
+      };
     }
   }
 
   if (existingNode.outputs) {
-    const outputs = Object.keys(existingNode.outputs)
-    const inputsLength = outputs.length
+    const outputs = Object.keys(existingNode.outputs);
+    const inputsLength = outputs.length;
 
     for (let i = 0; i < inputsLength; ++i) {
-      const key = outputs[i]
-      const value = existingNode.outputs[key]
+      const key = outputs[i];
+      const value = existingNode.outputs[key];
 
       newNode.outputs[key] = {
         label: value.label,
@@ -48,7 +48,7 @@ export default function createNode(name, x, y) {
 
         connections: [],
         value: 0
-      }
+      };
     }
   }
 }

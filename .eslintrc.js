@@ -1,19 +1,15 @@
 module.exports = {
   root: true,
-  parser: 'babel-eslint',
+  parser: "babel-eslint",
   parserOptions: {
-    sourceType: 'module'
+    sourceType: "module"
   },
   env: {
     browser: true,
-    node: true,
+    node: true
   },
-  extends: [
-    "prettier-standard/lib/base",
-    "prettier",
-    "prettier/standard"
-  ],
+  plugins: ["prettier"],
   rules: {
-    'prettier/prettier': 'error',
+    "prettier/prettier": "error"
   }
-}
+};

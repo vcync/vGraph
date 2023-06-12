@@ -1,80 +1,80 @@
-import uuid4 from 'uuid/v4'
+import uuid4 from "uuid/v4";
 
 function getInputCoords(e) {
-  if (typeof e.clientX === 'number') {
-    return [e.clientX, e.clientY]
+  if (typeof e.clientX === "number") {
+    return [e.clientX, e.clientY];
   }
 
   if (e.touches && e.touches.length) {
-    return [e.touches[0].clientX, e.touches[0].clientY]
+    return [e.touches[0].clientX, e.touches[0].clientY];
   }
 }
 
 export default class InputStatus {
   constructor(vGraph, element = window) {
-    this.vGraph = vGraph
-    this.element = element
+    this.vGraph = vGraph;
+    this.element = element;
 
-    this.mousedownWatchers = {}
-    this.mousemoveWatchers = {}
-    this.mouseupWatchers = {}
-    this.keydownWatchers = {}
-    this.keyupWatchers = {}
+    this.mousedownWatchers = {};
+    this.mousemoveWatchers = {};
+    this.mouseupWatchers = {};
+    this.keydownWatchers = {};
+    this.keyupWatchers = {};
 
-    this.shiftPressed = false
-    this.altPressed = false
-    this.ctrlPressed = false
-    this.metaPressed = false
+    this.shiftPressed = false;
+    this.altPressed = false;
+    this.ctrlPressed = false;
+    this.metaPressed = false;
 
-    this.keysDown = []
-    this.heldWithMeta = []
+    this.keysDown = [];
+    this.heldWithMeta = [];
 
-    this.lastUp = -1
-    this.lastDown = -1
-    this.lastMove = -1
-    this.lastX = -1
-    this.lastY = -1
-    this.lastUnscaledX = -1
-    this.lastUnscaledY = -1
+    this.lastUp = -1;
+    this.lastDown = -1;
+    this.lastMove = -1;
+    this.lastX = -1;
+    this.lastY = -1;
+    this.lastUnscaledX = -1;
+    this.lastUnscaledY = -1;
 
-    this.resetValues()
+    this.resetValues();
 
-    window.addEventListener('keydown', this.keydown.bind(this))
-    window.addEventListener('keyup', this.keyup.bind(this))
-    element.addEventListener('mousedown', this.mousedown.bind(this))
-    element.addEventListener('mousemove', this.mousemove.bind(this))
-    element.addEventListener('mouseup', this.mouseup.bind(this))
+    window.addEventListener("keydown", this.keydown.bind(this));
+    window.addEventListener("keyup", this.keyup.bind(this));
+    element.addEventListener("mousedown", this.mousedown.bind(this));
+    element.addEventListener("mousemove", this.mousemove.bind(this));
+    element.addEventListener("mouseup", this.mouseup.bind(this));
   }
 
   destroy() {
-    window.removeEventListener('keydown', this.keydown.bind(this))
-    window.removeEventListener('keyup', this.keyup.bind(this))
-    this.element.removeEventListener('mousedown', this.mousedown.bind(this))
-    this.element.removeEventListener('mousemove', this.mousemove.bind(this))
-    this.element.removeEventListener('mouseup', this.mouseup.bind(this))
+    window.removeEventListener("keydown", this.keydown.bind(this));
+    window.removeEventListener("keyup", this.keyup.bind(this));
+    this.element.removeEventListener("mousedown", this.mousedown.bind(this));
+    this.element.removeEventListener("mousemove", this.mousemove.bind(this));
+    this.element.removeEventListener("mouseup", this.mouseup.bind(this));
   }
 
   resetValues() {
-    this.unscaledX = -1
-    this.unscaledY = -1
-    this.x = -1
-    this.y = -1
-    this.deltaX = -1
-    this.deltaY = -1
+    this.unscaledX = -1;
+    this.unscaledY = -1;
+    this.x = -1;
+    this.y = -1;
+    this.deltaX = -1;
+    this.deltaY = -1;
 
-    this.downX = -1
-    this.downY = -1
+    this.downX = -1;
+    this.downY = -1;
 
-    this.isDown = false
-    this.isUp = true
-    this.action = null
+    this.isDown = false;
+    this.isUp = true;
+    this.action = null;
 
-    this.button = -1
+    this.button = -1;
   }
 
   createWatcher(expression, action) {
-    let expr = expression
-    if (typeof expression === 'string') {
+    let expr = expression;
+    if (typeof expression === "string") {
       // eslint-disable-next-line
       expr = new Function(
         `const {
@@ -103,37 +103,37 @@ export default class InputStatus {
         } = this
 
         return ${expression}`
-      ).bind(this)
+      ).bind(this);
     }
 
     return {
       expression: expr,
       action
-    }
+    };
   }
 
   watch(event) {
-    const argsLength = arguments.length
+    const argsLength = arguments.length;
 
-    const id = uuid4()
+    const id = uuid4();
 
     // if (!this[`${event}Watchers`]) {
     //   this[`${event}Watchers`] = {}
     // }
 
     if (argsLength > 2) {
-      const [event, expression, action] = arguments
-      this[`${event}Watchers`][id] = this.createWatcher(expression, action)
+      const [event, expression, action] = arguments;
+      this[`${event}Watchers`][id] = this.createWatcher(expression, action);
     } else {
-      const [event, action] = arguments
-      this[`${event}Watchers`][id] = this.createWatcher(false, action)
+      const [event, action] = arguments;
+      this[`${event}Watchers`][id] = this.createWatcher(false, action);
     }
 
-    return id
+    return id;
   }
 
   unwatch(event, id) {
-    delete this[`mouse${event}Watchers`][id]
+    delete this[`mouse${event}Watchers`][id];
   }
 
   scale(x, y) {
@@ -143,181 +143,181 @@ export default class InputStatus {
       scale,
       scaleOffsetX,
       scaleOffsetY
-    } = this.vGraph
+    } = this.vGraph;
 
     return [
       (x * dpr - scaleOffsetX * width) / scale,
       (y * dpr - scaleOffsetY * height) / scale
-    ]
+    ];
   }
 
   keydown(e) {
-    const { keyCode, repeat } = e
+    const { keyCode, repeat } = e;
     if (repeat) {
-      return
+      return;
     }
 
-    const index = this.keysDown.indexOf(keyCode)
+    const index = this.keysDown.indexOf(keyCode);
     if (index < 0) {
-      this.keysDown.push(keyCode)
+      this.keysDown.push(keyCode);
     }
 
     // Shift
     if (keyCode === 16) {
-      this.shiftPressed = true
+      this.shiftPressed = true;
     }
 
     // Ctrl
     if (keyCode === 17) {
-      this.ctrlPressed = true
+      this.ctrlPressed = true;
     }
 
     // Alt
     if (keyCode === 18) {
-      this.altPressed = true
+      this.altPressed = true;
     }
 
     // Super
     if (keyCode === 91 || keyCode === 92) {
-      this.metaPressed = true
+      this.metaPressed = true;
     }
 
     if ((e.metaKey && keyCode !== 91) || keyCode !== 92) {
-      const index = this.heldWithMeta.indexOf(keyCode)
+      const index = this.heldWithMeta.indexOf(keyCode);
       if (index < 0) {
-        this.heldWithMeta.push(keyCode)
+        this.heldWithMeta.push(keyCode);
       }
     }
 
-    this.checkKeydown(e)
+    this.checkKeydown(e);
   }
 
   keyup(e) {
-    const { keyCode } = e
+    const { keyCode } = e;
 
-    const index = this.keysDown.indexOf(keyCode)
+    const index = this.keysDown.indexOf(keyCode);
     if (index > -1) {
-      this.keysDown.splice(index, 1)
+      this.keysDown.splice(index, 1);
     }
 
     // Shift
     if (keyCode === 16) {
-      this.shiftPressed = false
+      this.shiftPressed = false;
     }
 
     // Ctrl
     if (keyCode === 17) {
-      this.ctrlPressed = false
+      this.ctrlPressed = false;
     }
 
     // Alt
     if (keyCode === 18) {
-      this.altPressed = false
+      this.altPressed = false;
     }
 
     // Super
     if (keyCode === 91 || keyCode === 92) {
-      this.metaPressed = false
+      this.metaPressed = false;
 
       for (let i = 0; i < this.heldWithMeta.length; ++i) {
-        const index = this.keysDown.indexOf(this.heldWithMeta[i])
+        const index = this.keysDown.indexOf(this.heldWithMeta[i]);
         if (index < 0) {
-          this.keysDown.splice(index, 1)
+          this.keysDown.splice(index, 1);
         }
       }
 
-      this.heldWithMeta = []
+      this.heldWithMeta = [];
     }
 
-    this.checkKeyup(e)
+    this.checkKeyup(e);
   }
 
   mousedown(e) {
-    const input = getInputCoords(e)
-    const scale = this.scale(...input)
+    const input = getInputCoords(e);
+    const scale = this.scale(...input);
 
-    this.x = scale[0]
-    this.y = scale[1]
-    this.unscaledX = input[0]
-    this.unscaledY = input[1]
+    this.x = scale[0];
+    this.y = scale[1];
+    this.unscaledX = input[0];
+    this.unscaledY = input[1];
 
-    this.downX = this.x
-    this.downY = this.y
+    this.downX = this.x;
+    this.downY = this.y;
 
-    this.isDown = true
-    this.isUp = false
+    this.isDown = true;
+    this.isUp = false;
 
-    this.button = e.button
+    this.button = e.button;
 
-    this.checkDown(e)
+    this.checkDown(e);
 
-    this.lastX = this.x
-    this.lastY = this.y
-    this.lastUnscaledX = this.unscaledX
-    this.lastUnscaledY = this.unscaledY
-    this.lastDown = Date.now()
+    this.lastX = this.x;
+    this.lastY = this.y;
+    this.lastUnscaledX = this.unscaledX;
+    this.lastUnscaledY = this.unscaledY;
+    this.lastDown = Date.now();
   }
 
   mouseup(e) {
-    this.isDown = false
-    this.isUp = true
+    this.isDown = false;
+    this.isUp = true;
 
-    this.checkUp(e)
+    this.checkUp(e);
 
-    this.action = null
-    this.lastUp = Date.now()
-    this.resetValues()
+    this.action = null;
+    this.lastUp = Date.now();
+    this.resetValues();
   }
 
   mousemove(e) {
-    const input = getInputCoords(e)
-    const scale = this.scale(...input)
+    const input = getInputCoords(e);
+    const scale = this.scale(...input);
 
-    this.x = scale[0]
-    this.y = scale[1]
-    this.unscaledX = input[0]
-    this.unscaledY = input[1]
-    this.deltaX = this.x - this.lastX
-    this.deltaY = this.y - this.lastY
+    this.x = scale[0];
+    this.y = scale[1];
+    this.unscaledX = input[0];
+    this.unscaledY = input[1];
+    this.deltaX = this.x - this.lastX;
+    this.deltaY = this.y - this.lastY;
 
-    this.checkMove(e)
+    this.checkMove(e);
 
-    this.lastMove = Date.now()
-    this.lastX = this.x
-    this.lastY = this.y
-    this.lastUnscaledX = this.unscaledX
-    this.lastUnscaledY = this.unscaledY
+    this.lastMove = Date.now();
+    this.lastX = this.x;
+    this.lastY = this.y;
+    this.lastUnscaledX = this.unscaledX;
+    this.lastUnscaledY = this.unscaledY;
   }
 
   checkDown(e) {
-    this.checkWatchers('mousedown', e)
+    this.checkWatchers("mousedown", e);
   }
 
   checkUp(e) {
-    this.checkWatchers('mouseup', e)
+    this.checkWatchers("mouseup", e);
   }
 
   checkMove(e) {
-    this.checkWatchers('mousemove', e)
+    this.checkWatchers("mousemove", e);
   }
 
   checkKeydown(e) {
-    this.checkWatchers('keydown', e)
+    this.checkWatchers("keydown", e);
   }
 
   checkKeyup(e) {
-    this.checkWatchers('keyup', e)
+    this.checkWatchers("keyup", e);
   }
 
   checkWatchers(event, realEvent) {
-    const keys = Object.keys(this[`${event}Watchers`])
-    const keysLength = keys.length
+    const keys = Object.keys(this[`${event}Watchers`]);
+    const keysLength = keys.length;
     for (let i = 0; i < keysLength; ++i) {
-      const watcher = this[`${event}Watchers`][keys[i]]
+      const watcher = this[`${event}Watchers`][keys[i]];
 
-      let canAction = true
+      let canAction = true;
       if (watcher.expression && !watcher.expression()) {
-        canAction = false
+        canAction = false;
       }
 
       if (canAction) {
@@ -350,7 +350,7 @@ export default class InputStatus {
             button: this.button
           }) ||
           this.action ||
-          null
+          null;
       }
     }
   }

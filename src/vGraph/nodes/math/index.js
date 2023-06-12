@@ -1,4 +1,4 @@
-import functions from './functions'
-import operations from './operations'
+import functions from "./functions";
+import operations from "./operations";
 
-export default [...functions, ...operations]
+export default [...functions, ...operations];
