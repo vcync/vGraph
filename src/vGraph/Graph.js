@@ -3,11 +3,8 @@ import { makeObjectWithLength } from "./util/make-object-with-length";
 
 import { Node } from "./Node";
 import { SubGraph } from "./SubGraph";
-import { HitPoints } from "../vGraphDOM/HitPoints";
 
 export class Graph {
-  hitpoints = new HitPoints();
-
   activeNodeDrawOrder = [];
   activeNodesExecOrder = [];
 
@@ -127,60 +124,19 @@ export class Graph {
   }
 
   updateExecOrder() {
-    const {
-      activeNodes,
-      activeNodeDrawOrder,
-      activeNodeDrawOrder: { length: activeNodesLength }
-    } = this;
+    const activeNodesLength = this.activeNodeDrawOrder.length;
     const connected = [];
 
     for (let i = 0; i < activeNodesLength; ++i) {
-      const node = activeNodes[activeNodeDrawOrder[i]];
+      const node = this.activeNodes[this.activeNodeDrawOrder[i]];
       if (this.isConnected(node)) {
         connected.push(node);
       }
     }
 
-    const inputCheck = {};
-    const tree = [];
-
-    const traverseTree = node => {
-      const inputs = node.inputs;
-
-      if (inputs.$connected && !inputCheck[node.id]) {
-        inputCheck[node.id] = 1;
-      } else if (inputs.$connected) {
-        inputCheck[node.id] += 1;
-      }
-
-      if (
-        inputs.$length &&
-        inputs.$connected &&
-        inputCheck[node.id] < inputs.$connected
-      ) {
-        return;
-      }
-
-      tree.push(node.id);
-
-      const outputs = Object.values(node.outputs);
-
-      for (let i = 0; i < outputs.length; ++i) {
-        const outputConnections = outputs[i].connections;
-
-        for (let j = 0; j < outputConnections.length; ++j) {
-          const toNode = activeNodes[outputConnections[j][0]];
-
-          traverseTree(toNode);
-        }
-      }
-    };
-
-    connected
-      .filter(node => !node.inputs.$length)
-      .forEach(node => traverseTree(node));
-
-    this.activeNodesExecOrder = tree;
+    this.activeNodesExecOrder = connected
+      .sort((nodeB, nodeA) => nodeA.outputs.$length - nodeB.outputs.$length)
+      .map(node => node.id);
   }
 
   deleteNode(node) {
