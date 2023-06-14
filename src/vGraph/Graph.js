@@ -48,12 +48,6 @@ export class Graph {
     return newNode;
   }
 
-  moveNode(id, x, y) {
-    const { activeNodes } = this;
-    const node = activeNodes[id];
-    node.position = [x, y];
-  }
-
   connect(node1, outputName, node2, inputName) {
     if (node2.inputs[inputName].connection.length) {
       return;

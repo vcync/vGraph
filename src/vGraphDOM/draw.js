@@ -164,7 +164,7 @@ export function draw() {
 
   for (let i = 0; i < widgetsLength; ++i) {
     const widget = widgets[i];
-    const node = activeNodes[widget.id];
+    const node = this.activeNodes[widget.id];
     if (!node) {
       widget.style.display = "none";
     } else {
