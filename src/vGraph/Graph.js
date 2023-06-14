@@ -2,7 +2,7 @@ import uuid4 from "uuid/v4";
 import { makeObjectWithLength } from "./util/make-object-with-length";
 
 import { Node } from "./Node";
-import SubGraph from "./SubGraph";
+import { SubGraph } from "./SubGraph";
 import { HitPoints } from "../vGraphDOM/HitPoints";
 
 export class Graph {

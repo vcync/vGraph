@@ -1,7 +1,7 @@
 import { Node } from "./Node";
 import { Graph } from "./Graph";
 
-export default class SubGraph extends Node {
+export class SubGraph extends Node {
   constructor(graph, options, id) {
     super(graph, options, id);
 
