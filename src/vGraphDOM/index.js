@@ -49,6 +49,7 @@ export class vGraphDOM {
   canvas = null;
 
   widgetOverlay = null;
+  widgetTransformArea = null;
   inputStatus = null;
 
   dpr = 1;
@@ -84,6 +85,10 @@ export class vGraphDOM {
 
     this.widgetOverlay = document.createElement("div");
     this.widgetOverlay.id = "vgraph-widgets";
+    this.widgetTransformArea = document.createElement("div");
+    this.widgetTransformArea.id = "vgraph-widgets__transform-area";
+    this.widgetOverlay.appendChild(this.widgetTransformArea);
+
     this.inputStatus = new InputStatus(this, this.widgetOverlay);
     interaction.bind(this)();
 
@@ -288,7 +293,7 @@ export class vGraphDOM {
         domElement.style.display = "flex";
 
         localNode.domElement = domElement;
-        this.widgetOverlay.appendChild(domElement);
+        this.widgetTransformArea.appendChild(domElement);
 
         if (
           localNode.height <

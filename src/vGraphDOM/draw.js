@@ -158,8 +158,8 @@ export function draw() {
     context.stroke();
   }
 
-  this.widgetOverlay.style.transform = `scale(${scale})`;
-  const widgets = this.widgetOverlay.children;
+  this.widgetTransformArea.style.transform = `scale(${scale})`;
+  const widgets = this.widgetTransformArea.children;
   const widgetsLength = widgets.length;
 
   for (let i = 0; i < widgetsLength; ++i) {

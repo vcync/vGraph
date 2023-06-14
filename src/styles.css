@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Mono:400,400i,700,700i&display=swap');
+@import url("https://fonts.googleapis.com/css?family=IBM+Plex+Mono:400,400i,700,700i&display=swap");
 
 html,
 body {
@@ -6,7 +6,7 @@ body {
 }
 
 body {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: "IBM Plex Mono", monospace;
   position: relative;
   margin: 0;
   overscroll-behavior: none;
@@ -27,10 +27,13 @@ canvas {
   left: 0;
   width: 100%;
   height: 100%;
+}
+
+#vgraph-widgets__transform-area {
   transform-origin: top left;
 }
 
-#vgraph-widgets > * {
+#vgraph-widgets__transform-area > * {
   position: absolute;
 }
 
@@ -87,7 +90,7 @@ canvas {
 }
 
 .nwjs-menu.contextmenu:after {
-  content: '';
+  content: "";
   border: 1px solid rgba(255, 255, 255, 0.14);
   box-sizing: border-box;
   width: 100%;
