@@ -53,6 +53,7 @@ export default [
     widget({ setOutput, outputUpdate }) {
       const out = document.createElement("div");
       const input = document.createElement("input");
+      input.style.width = "25%";
       input.type = "number";
       input.value = 0;
       input.step = 0.001;
@@ -81,6 +82,7 @@ export default [
     widget({ setOutput, outputUpdate }) {
       const out = document.createElement("div");
       const input = document.createElement("input");
+      input.style.width = "75%";
       input.type = "text";
       input.value = "";
       input.addEventListener("input", e => {

@@ -56,7 +56,6 @@ export class vGraphDOM {
   minScale = 0.1;
   scaleOffsetX = 0;
   scaleOffsetY = 0;
-  pointRadius = 5;
   tooltip = "";
 
   draw = draw.bind(this);
@@ -99,6 +98,8 @@ export class vGraphDOM {
     events.forEach(event => {
       this._boundHandlers[event] = this[`${event}_eventHandler`].bind(this);
     });
+
+    this.generateTypeColors("bool", 100);
   }
 
   set graphToEdit(graph) {
@@ -133,7 +134,7 @@ export class vGraphDOM {
   }
 
   moveNode(id, x, y) {
-    const { activeNodes, dpr, pointRadius, theme } = this;
+    const { activeNodes, dpr, theme } = this;
     const nodeSize = activeNodes[id];
     const node = this.graphToEdit.activeNodes[id];
 
@@ -155,8 +156,7 @@ export class vGraphDOM {
     if (activeNodes[id].domElement) {
       const { domElement } = activeNodes[id];
 
-      domElement.style.left = `${x / dpr}px`;
-      domElement.style.top = `${y / dpr}px`;
+      domElement.style.transform = `translate(${x / dpr}px, ${y / dpr}px)`;
     }
 
     const inputs = Object.keys(node.inputs);
@@ -167,7 +167,10 @@ export class vGraphDOM {
 
       hitpoints.update(input.id, {
         x: x,
-        y: theme.node.padding * dpr * 2 + y + i * pointRadius * 2 * dpr * 2
+        y:
+          theme.node.padding * dpr * 2 +
+          y +
+          i * theme.node.connectorRadiusMarginVertical * dpr * 2
       });
     }
 
@@ -179,7 +182,10 @@ export class vGraphDOM {
 
       hitpoints.update(output.id, {
         x: x + nodeSize.width * dpr,
-        y: theme.node.padding * dpr * 2 + y + i * pointRadius * 2 * dpr * 2
+        y:
+          theme.node.padding * dpr * 2 +
+          y +
+          i * theme.node.connectorRadiusMarginVertical * dpr * 2
       });
     }
   }
@@ -190,6 +196,11 @@ export class vGraphDOM {
 
   disconnect(nodeId, inputName, spliceOutput = true) {
     this.graphToEdit.disconnect(nodeId, inputName, spliceOutput);
+  }
+
+  redraw() {
+    cancelAnimationFrame(this._raf);
+    this._raf = requestAnimationFrame(this.draw);
   }
 
   applyTheme(newTheme) {
@@ -218,7 +229,7 @@ export class vGraphDOM {
     theme.node.focusedTitleColor = b_inv;
     theme.tooltip.textColor = f_high;
 
-    requestAnimationFrame(this.draw);
+    this.redraw();
   }
 
   createNode(name, x, y) {
@@ -234,7 +245,7 @@ export class vGraphDOM {
 
     const node = this.graphToEdit.createNode(nodeDefinition);
 
-    const { dpr, theme, pointRadius, graphHitpoints } = this;
+    const { dpr, theme, graphHitpoints } = this;
     const maxNodes = Math.max(node.inputs.$length, node.outputs.$length);
 
     // Create hitpoints for node's graph if it doesn't exist
@@ -250,19 +261,11 @@ export class vGraphDOM {
     let width = 150;
     let height = 50;
 
-    height = maxNodes * ((pointRadius * 4) / dpr) * dpr;
-    width += theme.node.padding * 2;
-    height += theme.node.padding * 2;
-
-    hitpoints.add(
-      "node",
-      node.id,
-      { nodeId: node.id },
-      x,
-      y,
-      x + width * dpr,
-      y + height * dpr
-    );
+    if (maxNodes) {
+      height = (maxNodes - 1) * theme.node.connectorRadiusMarginVertical * dpr;
+    }
+    width += theme.node.padding * 2 * dpr;
+    height += theme.node.padding * 2 * dpr;
 
     const localNode = { ref: node, id: node.id, width, height, x, y };
 
@@ -281,24 +284,34 @@ export class vGraphDOM {
       if (domElement) {
         domElement.id = node.id;
         domElement.style.padding = `${theme.node.padding}px`;
-        domElement.style.top = `${y / dpr}px`;
-        domElement.style.left = `${x / dpr}px`;
+        domElement.style.transform = `translate(${x / dpr}px, ${y / dpr}px)`;
+        domElement.style.display = "flex";
+
         localNode.domElement = domElement;
         this.widgetOverlay.appendChild(domElement);
 
         if (
           localNode.height <
-          domElement.clientHeight - theme.node.padding * 2
+          domElement.clientHeight + theme.node.padding * 2
         ) {
-          localNode.height +=
-            domElement.clientHeight +
-            theme.node.padding * 2 -
-            localNode.height * dpr;
+          const { height } = domElement.getBoundingClientRect();
+
+          localNode.height = height / this.scale;
         }
 
         localNode.domElement = domElement;
       }
     }
+
+    hitpoints.add(
+      "node",
+      node.id,
+      { nodeId: node.id },
+      x,
+      y,
+      x + localNode.width * dpr,
+      y + localNode.height * dpr
+    );
 
     if (nodeDefinition.onInput) {
       node.on("input", ({ inputs }) => {
@@ -314,55 +327,22 @@ export class vGraphDOM {
     } = node;
 
     // Create hitpoints for node outputs
-    // TODO: use addOutput instead
-
     const outputKeys = Object.entries(node.outputs);
 
     for (let i = 0; i < outputsLength; i += 1) {
       const [key, value] = outputKeys[i];
-      const { id } = value;
-
-      hitpoints.add(
-        "connector",
-        id,
-        {
-          nodeId: node.id,
-          connectorId: id,
-          output: true,
-          name: key,
-          dataType: value.type
-        },
-        x + width * dpr,
-        y + outputsLength * pointRadius * 2 * dpr,
-        pointRadius * dpr
-      );
+      this.addOutput(node.id, key, value, i);
     }
 
     // Create hitpoints for node inputs
-    // TODO: use addInput instead
     const inputKeys = Object.entries(node.inputs);
 
     for (let i = 0; i < inputsLength; i += 1) {
       const [key, value] = inputKeys[i];
-      const { id } = value;
-
-      hitpoints.add(
-        "connector",
-        id,
-        {
-          nodeId: node.id,
-          connectorId: id,
-          output: false,
-          dataType: value.type,
-          name: key
-        },
-        x,
-        y + inputsLength * pointRadius * 2 * dpr * 2,
-        pointRadius * dpr
-      );
+      this.addInput(node.id, key, value, i);
     }
 
-    requestAnimationFrame(this.draw);
+    this.redraw();
 
     return node;
   }
@@ -387,23 +367,45 @@ export class vGraphDOM {
     );
   }
 
-  deleteNode(id) {
-    this.vGraphCore.deleteNode(id);
+  deleteNode(nodes) {
+    if (Array.isArray(nodes)) {
+      return nodes.map(item => this.deleteNode(item));
+    }
 
-    delete this.activeNodes[id];
+    const { graphHitpoints } = this;
+    const { ref: node, domElement } = this.activeNodes[nodes.id];
+
+    if (this.domElement) {
+      this.domElement.remove();
+    }
+
+    const hitpoints = graphHitpoints[node.graph.id];
+
+    [
+      node.id,
+      ...Object.values(node.outputs).map(output => output.id),
+      ...Object.values(node.inputs).map(input => input.id)
+    ].forEach(id => hitpoints.remove(id));
+
+    this.vGraphCore.deleteNode(node);
+    delete this.activeNodes[node.id];
   }
 
-  addInput(nodeId, key, value) {
-    const { pointRadius, dpr, graphHitpoints } = this;
+  addInput(nodeId, key, value, index) {
+    const { theme, dpr, graphHitpoints } = this;
     const { ref: node, x, y } = this.activeNodes[nodeId];
-    const id = node.addInput(key, value);
+
+    let id = value.id;
+    if (!value.id) {
+      id = node.addInput(key, value);
+    }
 
     let hitpoints = graphHitpoints[node.graph.id];
     if (node.isSubgraph) {
       hitpoints = graphHitpoints[node.parent.id];
     }
 
-    const inputsLength = node.inputs.$length;
+    const inputIndex = index ?? node.inputs.$length;
 
     hitpoints.add(
       "connector",
@@ -416,39 +418,45 @@ export class vGraphDOM {
         name: key
       },
       x,
-      y + inputsLength * pointRadius * 2 * dpr * 2,
-      pointRadius * dpr
+      theme.node.padding * dpr * 2 +
+        y +
+        inputIndex * theme.node.connectorRadiusMarginVertical * dpr * 2,
+      theme.node.connectorRadius * dpr
     );
   }
 
-  addOutput(nodeId, key, value) {
-    const { pointRadius, dpr, graphHitpoints } = this;
+  addOutput(nodeId, key, value, index) {
+    const { theme, dpr, graphHitpoints } = this;
     const { ref: node, x, y, width } = this.activeNodes[nodeId];
-    const id = node.addOutput(key, value);
+
+    let id = value.id;
+    if (!value.id) {
+      id = node.addOutput(key, value);
+    }
 
     let hitpoints = graphHitpoints[node.graph.id];
     if (node.isSubgraph) {
       hitpoints = graphHitpoints[node.parent.id];
     }
 
-    const outputsLength = node.outputs.$length;
+    const outputIndex = index ?? node.outputs.$length;
 
-    for (let i = 0; i < outputsLength; i += 1) {
-      hitpoints.add(
-        "connector",
-        id,
-        {
-          nodeId: node.id,
-          connectorId: id,
-          output: true,
-          dataType: value.type,
-          name: key
-        },
-        x + width * dpr,
-        y + outputsLength * pointRadius * 2 * dpr,
-        pointRadius * dpr
-      );
-    }
+    hitpoints.add(
+      "connector",
+      id,
+      {
+        nodeId: node.id,
+        connectorId: id,
+        output: true,
+        dataType: value.type,
+        name: key
+      },
+      x + width * dpr,
+      theme.node.padding * dpr * 2 +
+        y +
+        outputIndex * theme.node.connectorRadiusMarginVertical * dpr * 2,
+      theme.node.connectorRadius * dpr
+    );
   }
 
   /**
@@ -489,21 +497,31 @@ export class vGraphDOM {
     });
   }
 
-  TYPE_ADDED_eventHandler(type) {
+  generateTypeColors(type, seedShift = 120) {
+    if (this.colors[type]) {
+      return;
+    }
+
+    const seed = `${seedShift}${type}`;
+
     this.colors[type] = {
       light: randomColor({
         luminosity: "light",
-        seed: type
+        seed
       }),
       bright: randomColor({
         luminosity: "bright",
-        seed: type
+        seed
       }),
       dark: randomColor({
         luminosity: "dark",
-        seed: type
+        seed
       })
     };
+  }
+
+  TYPE_ADDED_eventHandler(type) {
+    this.generateTypeColors(type);
   }
 
   CREATE_NODE_eventHandler(node) {
@@ -515,6 +533,6 @@ export class vGraphDOM {
   DELETE_NODE_eventHandler(nodeId) {
     delete this.activeNodes[nodeId];
 
-    requestAnimationFrame(this.draw);
+    this.redraw();
   }
 }

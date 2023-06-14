@@ -22,5 +22,5 @@ export default function dblclick(e) {
     this.graphToEdit = graphToEdit.parent || this.vGraphCore.graph;
   }
 
-  requestAnimationFrame(this.draw);
+  this.redraw();
 }

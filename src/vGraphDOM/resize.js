@@ -5,5 +5,5 @@ export function resize() {
   canvas.width = innerWidth * dpr;
   canvas.height = innerHeight * dpr;
 
-  requestAnimationFrame(this.draw);
+  this.redraw();
 }

@@ -8,7 +8,7 @@ export const defaultTheme = {
   node: {
     backgroundColor: "rgba(180,180,180,0.8)",
     focusedBackgroundColor: "rgba(180,180,180,0.8)",
-    padding: 5,
+    padding: 8,
     margin: 10,
 
     borderRadius: 10,
@@ -23,6 +23,7 @@ export const defaultTheme = {
     focusedTitleColor: "#000",
 
     connectorRadius: 6,
+    connectorRadiusMarginVertical: 6 * 1.8,
     connectorOutlineColor: "#000",
     connectorFocusedOutlineColor: "#000",
     connectorOutlineWidth: 1,

@@ -87,7 +87,7 @@ export const drawGraphItem = (
         input.type === "any" ||
         startPoint.data.dataType === input.type)
     ) {
-      context.strokeStyle = connectorFocusedOutlineColor;
+      context.strokeStyle = colors[input.type].dark;
       context.lineWidth = connectorFocusedOutlineWidth * dpr;
     } else {
       context.strokeStyle = connectorOutlineColor;
@@ -127,7 +127,7 @@ export const drawGraphItem = (
 
     if (startPoint && output.id === startPoint.data.connectorId) {
       context.lineWidth = connectorFocusedOutlineWidth * dpr;
-      context.strokeStyle = connectorFocusedOutlineColor;
+      context.strokeStyle = colors[output.type].dark;
     } else {
       context.strokeStyle = connectorOutlineColor;
       context.lineWidth = connectorOutlineWidth * dpr;

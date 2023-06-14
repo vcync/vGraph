@@ -168,11 +168,11 @@ export function draw() {
     if (!node) {
       widget.style.display = "none";
     } else {
-      widget.style.top = `${(node.y + (scaleOffsetY * height) / scale) /
-        dpr}px`;
-      widget.style.left = `${(node.x + (scaleOffsetX * width) / scale) /
-        dpr}px`;
-      widget.style.display = "block";
+      const x = (node.x + (scaleOffsetX * width) / scale) / dpr;
+      const y = (node.y + (scaleOffsetY * height) / scale) / dpr;
+
+      widget.style.transform = `translate(${x}px, ${y}px)`;
+      widget.style.display = "flex";
     }
   }
 
@@ -210,12 +210,12 @@ export function draw() {
   if (this.debug.executionOrder) {
     context.fillStyle = "#f2bd09";
     for (let i = 0; i < this.graphToEdit.activeNodesExecOrder.length; ++i) {
-      const { id: nodeId } = this.graphToEdit.activeNodesExecOrder[i];
-      const { x1, y1 } = this.graphHitpoints[this.graphToEdit.id].find(
+      const nodeId = this.graphToEdit.activeNodesExecOrder[i];
+      const { x1, y1 } = this.graphHitpoints[this.graphToEdit.id].points.find(
         ({ id }) => id === nodeId
       );
 
-      context.fillText(i, x1, y1);
+      context.fillText(i, x1, y1 - 14 * dpr);
     }
   }
 

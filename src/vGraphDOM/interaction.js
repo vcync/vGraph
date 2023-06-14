@@ -19,11 +19,17 @@ export default function interaction() {
 
     if (point) {
       this.tooltip = point.data.dataType;
-    } else {
+      this.redraw();
+      return;
+    } else if (this.tooltip) {
       this.tooltip = "";
+      this.redraw();
+      return;
     }
 
-    requestAnimationFrame(this.draw);
+    if (e.action) {
+      this.redraw();
+    }
   });
 
   this.inputStatus.watch("mousemove", 'action === "touchscaling"', e => {
@@ -60,7 +66,7 @@ export default function interaction() {
         this.inputStatus.x = x;
         this.inputStatus.y = y;
 
-        requestAnimationFrame(this.draw);
+        this.redraw();
       } else if (!e.action) {
         return "panning";
       }
@@ -77,11 +83,11 @@ export default function interaction() {
     if (point && point.data.output) {
       this.startPoint = point;
       this.lineDrawing = true;
-      requestAnimationFrame(this.draw);
+      this.redraw();
       return "linedrawing";
     } else if (point && "output" in point.data && !point.data.output) {
       this.disconnect(point.data.nodeId, point.data.name);
-      requestAnimationFrame(this.draw);
+      this.redraw();
       return "disconnectnode";
     }
   });
@@ -158,7 +164,7 @@ export default function interaction() {
       }
     }
 
-    requestAnimationFrame(this.draw);
+    this.redraw();
   });
 
   this.inputStatus.watch("mousedown", "!action", e => {
@@ -239,7 +245,7 @@ export default function interaction() {
       }
     });
 
-    requestAnimationFrame(this.draw);
+    this.redraw();
   });
 
   this.inputStatus.watch("mouseup", 'action === "linedrawing"', e => {
@@ -260,7 +266,7 @@ export default function interaction() {
     this.startPoint = false;
     this.endPoint = false;
 
-    requestAnimationFrame(this.draw);
+    this.redraw();
   });
 
   this.inputStatus.watch(
@@ -269,7 +275,7 @@ export default function interaction() {
     e => {
       e.event.preventDefault();
       this.focusedNodes = Object.values(this.graph.activeNodes);
-      requestAnimationFrame(this.draw);
+      this.redraw();
     }
   );
 }
