@@ -1,6 +1,7 @@
 import "./nwjs-menu-browser/nwjs-menu-browser.css";
 import "./styles.css";
 import { vGraph as VGraph } from "./vGraph";
+import SubGraph from "./vGraph/nodes/SubGraph";
 import mathNodes from "./vGraph/nodes/math";
 import meydaNodes from "./vGraph/nodes/meyda";
 import modVModuleNodes from "./vGraph/nodes/modv/modules";
@@ -9,6 +10,7 @@ import inputNodes from "./vGraph/nodes/input";
 import outputNodes from "./vGraph/nodes/output";
 import numberNodes from "./vGraph/nodes/number";
 import { Menu, MenuItem } from "./nwjs-menu-browser";
+import { vGraphDOM } from "./vGraphDOM";
 
 const output = document.createElement("canvas");
 const outputContext = output.getContext("2d");
@@ -28,24 +30,31 @@ setup();
 async function setup() {
   vGraph = new VGraph();
   window.vGraph = vGraph;
+  console.log(vGraph);
+
+  const dom = new vGraphDOM();
+  window.vGraphDOM = dom;
+  dom.useGraph(vGraph);
+  console.log(dom);
+
   // vGraph.debug.hitpoints = false;
   document.body.appendChild(output);
-  document.body.appendChild(vGraph.canvas);
-  document.body.appendChild(vGraph.widgetOverlay);
+  document.body.appendChild(dom.canvas);
+  document.body.appendChild(dom.widgetOverlay);
 
   window.addEventListener("resize", resize);
   resize();
-  console.log(vGraph);
 
-  vGraph.registerNode(mathNodes);
-  vGraph.registerNode(meydaNodes);
-  vGraph.registerNode(modVNodes);
-  vGraph.registerNode(modVModuleNodes);
-  vGraph.registerNode(inputNodes);
-  vGraph.registerNode(outputNodes);
-  vGraph.registerNode(numberNodes);
+  dom.registerNode(SubGraph);
+  dom.registerNode(mathNodes);
+  dom.registerNode(meydaNodes);
+  dom.registerNode(modVNodes);
+  dom.registerNode(modVModuleNodes);
+  dom.registerNode(inputNodes);
+  dom.registerNode(outputNodes);
+  dom.registerNode(numberNodes);
 
-  vGraph.registerNode({
+  dom.registerNode({
     name: "modV/visualInput",
     group: "modV",
     title: "Visual Input",
@@ -76,7 +85,7 @@ async function setup() {
     }
   });
 
-  vGraph.registerNode({
+  dom.registerNode({
     name: "modV/visualOutput",
     group: "modV",
     title: "Visual Output",
@@ -101,7 +110,7 @@ async function setup() {
   const visualMonitorCanvas = document.createElement("canvas");
   const visualMonitorContext = visualMonitorCanvas.getContext("2d");
 
-  vGraph.registerNode({
+  dom.registerNode({
     name: "modV/visualMonitor",
     group: "modV",
     title: "Visual Monitor",

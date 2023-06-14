@@ -11,7 +11,7 @@ export default function interaction() {
   );
 
   this.inputStatus.watch("mousemove", e => {
-    const { point } = this.graphToEdit.hitpoints.hasIntersect(
+    const { point } = this.graphHitpoints[this.graphToEdit.id].hasIntersect(
       "connector",
       e.x,
       e.y
@@ -59,6 +59,8 @@ export default function interaction() {
 
         this.inputStatus.x = x;
         this.inputStatus.y = y;
+
+        requestAnimationFrame(this.draw);
       } else if (!e.action) {
         return "panning";
       }
@@ -66,7 +68,7 @@ export default function interaction() {
   );
 
   this.inputStatus.watch("mousedown", "!action && button === 0", e => {
-    const { point } = this.graphToEdit.hitpoints.hasIntersect(
+    const { point } = this.graphHitpoints[this.graphToEdit.id].hasIntersect(
       "connector",
       e.x,
       e.y
@@ -91,7 +93,7 @@ export default function interaction() {
       const { startPoint } = this;
       this.tooltip = startPoint.data.dataType;
 
-      const { point } = this.graphToEdit.hitpoints.hasIntersect(
+      const { point } = this.graphHitpoints[this.graphToEdit.id].hasIntersect(
         "connector",
         e.x,
         e.y
@@ -107,12 +109,18 @@ export default function interaction() {
   );
 
   this.inputStatus.watch("mousedown", "!action", e => {
-    const { hitpoints, activeNodes, activeNodeDrawOrder } = this.graphToEdit;
+    const { activeNodes, activeNodeDrawOrder } = this.graphToEdit;
+    const hitpoints = this.graphHitpoints[this.graphToEdit.id];
 
     let newFocusedNode = false;
     let focusedNodeClicked = false;
 
-    const { point } = hitpoints.hasIntersect("node", e.x, e.y);
+    const { point } = this.graphHitpoints[this.graphToEdit.id].hasIntersect(
+      "node",
+      e.x,
+      e.y
+    );
+
     if (point) {
       const node = activeNodes[point.data.nodeId];
 
@@ -154,7 +162,11 @@ export default function interaction() {
   });
 
   this.inputStatus.watch("mousedown", "!action", e => {
-    const { point } = this.graphToEdit.hitpoints.hasIntersect("node", e.x, e.y);
+    const { point } = this.graphHitpoints[this.graphToEdit.id].hasIntersect(
+      "node",
+      e.x,
+      e.y
+    );
 
     if (point) {
       return "nodemoving";
@@ -169,10 +181,12 @@ export default function interaction() {
 
     for (let i = 0; i < focusedNodesLength; ++i) {
       const focusedNode = focusedNodes[i];
+      const nodeSize = this.activeNodes[focusedNode.id];
+
       this.moveNode(
         focusedNode.id,
-        focusedNode.x + e.deltaX,
-        focusedNode.y + e.deltaY
+        nodeSize.x + e.deltaX,
+        nodeSize.y + e.deltaY
       );
     }
 
@@ -190,9 +204,13 @@ export default function interaction() {
 
     for (let i = 0; i < activeNodeDrawOrderLength; ++i) {
       const node = activeNodes[activeNodeDrawOrder[i]];
+      const nodeSize = this.activeNodes[node.id];
 
       const intersect = isIntersectRect(
-        { x: node.x + node.width / 2, y: node.y + node.height / 2 },
+        {
+          x: nodeSize.x + nodeSize.width / 2,
+          y: nodeSize.y + nodeSize.height / 2
+        },
         {
           x1: Math.min(e.downX, e.x),
           y1: Math.min(e.downY, e.y),
@@ -250,7 +268,7 @@ export default function interaction() {
     "metaPressed && keysDown.indexOf(65) > -1 && !vGraph.widgetOverlay.contains(document.activeElement)",
     e => {
       e.event.preventDefault();
-      this.focusedNodes = Object.values(this.graphToEdit.activeNodes);
+      this.focusedNodes = Object.values(this.graph.activeNodes);
       requestAnimationFrame(this.draw);
     }
   );

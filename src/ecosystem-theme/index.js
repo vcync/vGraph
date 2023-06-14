@@ -1,4 +1,4 @@
-export default function Theme(_default) {
+export function Theme(_default) {
   const themer = this;
 
   this.active = _default;

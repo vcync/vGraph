@@ -1,12 +1,9 @@
 import { Node } from "./Node";
-import HitPoints from "./HitPoints";
-import Graph from "./Graph";
+import { Graph } from "./Graph";
 
 export default class SubGraph extends Node {
-  hitpoints = new HitPoints();
-
-  constructor(graph, x, y, options, id) {
-    super(graph, x, y, options, id);
+  constructor(graph, options, id) {
+    super(graph, options, id);
 
     this.graph = new Graph(graph.vGraph);
     this.graph.name = options.name;

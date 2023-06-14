@@ -1,4 +1,4 @@
-export default function resize() {
+export function resize() {
   const { canvas } = this;
   const { devicePixelRatio: dpr, innerWidth, innerHeight } = window;
   this.dpr = dpr;

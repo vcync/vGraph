@@ -1,6 +1,6 @@
 import getInputCoords from "../util/get-input-coords";
-import buildNodeMenu from "./build-node-menu";
-import buildSubgraphMenuItems from "./build-subgraph-menu-items";
+import { buildNodeMenu } from "./build-node-menu";
+import { buildSubgraphMenuItems } from "./build-subgraph-menu-items";
 import { MenuItem } from "../../nwjs-menu-browser";
 
 let menu;
@@ -8,8 +8,7 @@ let menu;
 export default function contextmenu(e) {
   e.preventDefault();
 
-  const { dpr } = this;
-  const { hitpoints, vGraph } = this.graphToEdit;
+  const { dpr, focusedNodes } = this;
 
   const input = getInputCoords(e);
 
@@ -23,6 +22,7 @@ export default function contextmenu(e) {
     y: this.mouseY
   };
 
+  const hitpoints = this.graphHitpoints[this.graphToEdit.id];
   const { point } = hitpoints.hasIntersect(
     "node",
     clientCoords.x,
@@ -40,15 +40,15 @@ export default function contextmenu(e) {
       new MenuItem({
         label: "Clone node(s)",
         click: () => {
-          vGraph.cloneNode(vGraph.focusedNodes.map(node => node.id));
+          this.cloneNode(focusedNodes.map(node => node.id));
         }
       }),
       0
     );
-  } else if (this.graphToEdit !== this.graph) {
+  } else if (this.graphToEdit !== this.vGraphCore.graph) {
     menu.insert(new MenuItem({ type: "separator" }), 0);
-    buildSubgraphMenuItems(this.graphToEdit, input[0], input[1]).forEach(
-      menuItem => menu.insert(menuItem)
+    buildSubgraphMenuItems(this, input[0], input[1]).forEach(menuItem =>
+      menu.insert(menuItem)
     );
   }
 

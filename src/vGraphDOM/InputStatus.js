@@ -10,7 +10,7 @@ function getInputCoords(e) {
   }
 }
 
-export default class InputStatus {
+export class InputStatus {
   constructor(vGraph, element = window) {
     this.vGraph = vGraph;
     this.element = element;

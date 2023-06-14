@@ -1,7 +1,9 @@
 import uuid4 from "uuid/v4";
+import EventEmitter from "eventemitter3";
 
-export default class GraphItem {
-  constructor(graph, x, y, options, id = uuid4()) {
+export default class GraphItem extends EventEmitter {
+  constructor(graph, options, id = uuid4()) {
+    super();
     this.parent = graph;
 
     const outputs = {};
@@ -73,12 +75,10 @@ export default class GraphItem {
     });
 
     this.id = id;
-    this.width = 150;
-    this.height = 50;
+
     this.title = options.title;
     this.name = options.name;
-    this.x = x;
-    this.y = y;
+
     this.itemHitpoints = [];
 
     if (options.exec) {
@@ -125,234 +125,6 @@ export default class GraphItem {
     if (options.destroy) {
       this._optionDestroy = options.destroy;
     }
-  }
-
-  set position(vector) {
-    const [x, y] = vector;
-    const { hitpoints } = this.parent;
-    const { dpr, pointRadius, theme } = this.parent.vGraph;
-    this.x = x;
-    this.y = y;
-
-    this.hitpoint = hitpoints.update(this.hitpoint.id, {
-      x1: x,
-      y1: y,
-      x2: x + this.width * dpr,
-      y2: y + this.height * dpr
-    });
-
-    const inputs = Object.keys(this.inputs);
-    const inputsLength = inputs.length;
-
-    for (let i = 0; i < inputsLength; ++i) {
-      const input = this.inputs[inputs[i]];
-
-      hitpoints.update(input.hitpoint.id, {
-        x: x,
-        y: theme.node.padding * dpr * 2 + y + i * pointRadius * 2 * dpr * 2
-      });
-    }
-
-    const outputs = Object.keys(this.outputs);
-    const outputsLength = outputs.length;
-
-    for (let i = 0; i < outputsLength; ++i) {
-      const output = this.outputs[outputs[i]];
-
-      hitpoints.update(output.hitpoint.id, {
-        x: x + this.width * dpr,
-        y: theme.node.padding * dpr * 2 + y + i * pointRadius * 2 * dpr * 2
-      });
-    }
-  }
-
-  calculateSize() {
-    const { dpr, theme, pointRadius } = this.parent.vGraph;
-
-    const maxNodes = Math.max(this.inputs.$length, this.outputs.$length);
-    this.height = maxNodes * ((pointRadius * 4) / dpr) * dpr;
-
-    this.width += theme.node.padding * 2;
-    this.height += theme.node.padding * 2;
-
-    this.position = [this.x, this.y];
-  }
-
-  draw() {
-    if (!this.parent.vGraph._hasDom) {
-      return;
-    }
-
-    const {
-      x,
-      y,
-      width,
-      height,
-      parent: { vGraph },
-      id,
-      title,
-      name,
-      inputs,
-      outputs
-    } = this;
-
-    const {
-      context,
-      dpr,
-      focusedNodes,
-      startPoint,
-      endPoint,
-      theme,
-      colors
-    } = vGraph;
-
-    const {
-      connectorRadius,
-      borderRadius,
-      backgroundColor,
-      focusedBackgroundColor,
-      fontFamily,
-      fontSize,
-      focusedOutlineWidth,
-      focusedOutlineColor,
-      titleColor,
-      focusedTitleColor,
-      textColor,
-      focusedTextColor,
-      connectorOutlineWidth,
-      connectorFocusedOutlineWidth,
-      outlineWidth,
-      outlineColor,
-      connectorOutlineColor,
-      connectorFocusedOutlineColor
-    } = theme.node;
-
-    const nodeFocused =
-      focusedNodes.findIndex(focused => focused.id === id) > -1;
-
-    context.save();
-    if (nodeFocused) {
-      context.fillStyle = focusedBackgroundColor;
-    } else {
-      context.fillStyle = backgroundColor;
-    }
-
-    context.font = `${fontSize * dpr}px ${fontFamily}`;
-
-    context.roundedRect(x, y, width * dpr, height * dpr, borderRadius * dpr);
-    if (outlineWidth && outlineColor) {
-      context.strokeStyle = outlineColor;
-      context.lineWidth = outlineWidth * dpr;
-      context.stroke();
-    }
-
-    context.fill();
-    if (nodeFocused) {
-      context.fillStyle = focusedTitleColor;
-      context.strokeStyle = focusedOutlineColor;
-      context.lineWidth = focusedOutlineWidth * dpr;
-      context.stroke();
-    } else {
-      context.fillStyle = titleColor;
-    }
-
-    context.fillText(title || name, x + 0.5, y - 5 + 0.5);
-
-    const inputKeys = Object.keys(inputs);
-    const inputsLength = inputKeys.length;
-    for (let i = 0; i < inputsLength; ++i) {
-      const input = inputs[inputKeys[i]];
-      const name = inputKeys[i];
-
-      const x = input.hitpoint.x;
-      const y = input.hitpoint.y;
-      context.fillStyle = colors[input.type].light;
-
-      if (
-        startPoint &&
-        (startPoint.data.dataType === input.type ||
-          startPoint.data.dataType === "any" ||
-          input.type === "any")
-      ) {
-        context.globalAlpha = 1;
-      } else if (!startPoint) {
-        context.globalAlpha = 1;
-      } else {
-        context.globalAlpha = 0.5;
-      }
-
-      if (
-        endPoint &&
-        endPoint.data.connectorId === input.id &&
-        startPoint &&
-        (startPoint.data.dataType === "any" ||
-          input.type === "any" ||
-          startPoint.data.dataType === input.type)
-      ) {
-        context.strokeStyle = connectorFocusedOutlineColor;
-        context.lineWidth = connectorFocusedOutlineWidth * dpr;
-      } else {
-        context.strokeStyle = connectorOutlineColor;
-        context.lineWidth = connectorOutlineWidth * dpr;
-      }
-
-      context.beginPath();
-      context.arc(x, y, connectorRadius * dpr, 0, Math.PI * 2);
-      context.fill();
-      context.stroke();
-
-      context.textBaseline = "middle";
-      context.fillStyle = textColor;
-      context.textAlign = "left";
-      if (nodeFocused) {
-        context.fillStyle = focusedTextColor;
-      } else {
-        context.fillStyle = textColor;
-      }
-      context.fillText(name, x + dpr * connectorRadius * 1.5 + 0.5, y + 0.5);
-    }
-
-    const outputsKeys = Object.keys(outputs);
-    const outputsLength = outputsKeys.length;
-    for (let i = 0; i < outputsLength; ++i) {
-      const output = outputs[outputsKeys[i]];
-      const name = outputsKeys[i];
-
-      const x = output.hitpoint.x;
-      const y = output.hitpoint.y;
-      context.fillStyle = colors[output.type].light;
-
-      if (startPoint && startPoint.data.dataType !== output.type) {
-        context.globalAlpha = 0.5;
-      } else {
-        context.globalAlpha = 1;
-      }
-
-      if (startPoint && output.id === startPoint.data.connectorId) {
-        context.lineWidth = connectorFocusedOutlineWidth * dpr;
-        context.strokeStyle = connectorFocusedOutlineColor;
-      } else {
-        context.strokeStyle = connectorOutlineColor;
-        context.lineWidth = connectorOutlineWidth * dpr;
-      }
-
-      context.beginPath();
-      context.arc(x, y, connectorRadius * dpr, 0, Math.PI * 2);
-      context.fill();
-      context.stroke();
-
-      context.textBaseline = "middle";
-      context.fillStyle = textColor;
-      context.textAlign = "right";
-      if (nodeFocused) {
-        context.fillStyle = focusedTextColor;
-      } else {
-        context.fillStyle = textColor;
-      }
-      context.fillText(name, x - dpr * connectorRadius * 1.5 + 0.5, y + 0.5);
-    }
-
-    context.restore();
   }
 
   destroy() {
@@ -410,45 +182,19 @@ export default class GraphItem {
     }
   }
 
-  addInput(key, value, calculateSize = true) {
+  addInput(key, value) {
     const {
-      parent: { vGraph },
-      inputs: { $length: inputsLength },
-      x,
-      y
+      parent: { vGraph }
     } = this;
 
-    const { hitpoints } = this.parent;
-
-    const { dpr, theme, pointRadius } = vGraph;
-
-    const connectorId = uuid4();
-
-    const hitpoint = hitpoints.add(
-      "connector",
-      {
-        connectorId,
-        nodeId: this.id,
-        output: false,
-        dataType: value.type,
-        name: key
-      },
-      x,
-      theme.node.padding * 2 * dpr +
-        y +
-        inputsLength * pointRadius * 2 * dpr * 2,
-      pointRadius * dpr
-    );
-
-    this.itemHitpoints.push(hitpoint.id);
+    const id = uuid4();
 
     this.inputs[key] = new Proxy(
       {
-        id: connectorId,
+        id,
         type: value.type,
         value: value.default,
-        connection: [],
-        hitpoint
+        connection: []
       },
       {
         set: (obj, prop, value) => {
@@ -456,12 +202,9 @@ export default class GraphItem {
 
           if (
             prop === "value" &&
-            this.onInput &&
-            vGraph.graphToEdit === this.parent &&
-            vGraph.showUi
+            vGraph.graphToEdit === this.parent // possible optimisation?
           ) {
-            this.onInput({
-              domElement: this.domElement,
+            this.emit("input", {
               inputs: this.inputs
             });
           }
@@ -480,52 +223,20 @@ export default class GraphItem {
       }
     );
 
-    if (calculateSize) {
-      this.calculateSize();
-    }
+    return id;
   }
 
-  addOutput(key, value, calculateSize = true) {
-    const {
-      parent: { vGraph },
-      outputs: { $length: outputsLength },
-      x,
-      y
-    } = this;
-
-    const { hitpoints } = this.parent;
-
-    const { dpr, theme, pointRadius } = vGraph;
-
-    const connectorId = uuid4();
-
-    const hitpoint = hitpoints.add(
-      "connector",
-      {
-        nodeId: this.id,
-        connectorId,
-        output: true,
-        name: key,
-        dataType: value.type
-      },
-      x + this.width * dpr + theme.node.padding * 2 * dpr,
-      theme.node.padding * dpr * 2 +
-        y +
-        outputsLength * pointRadius * 2 * dpr * 2,
-      pointRadius * dpr
-    );
-
-    this.itemHitpoints.push(hitpoint.id);
+  addOutput(key, value) {
+    const id = uuid4();
 
     this.outputs[key] = new Proxy(
       {
-        id: connectorId,
+        id,
         key,
         type: value.type,
         value: value.default,
         connectionRequired: value.connectionRequired || false,
-        connections: [],
-        hitpoint
+        connections: []
       },
       {
         set: (obj, prop, value) => {
@@ -537,8 +248,8 @@ export default class GraphItem {
             }
           }
 
-          if (prop === "value" && this._widgetOutputUpdate) {
-            this._widgetOutputUpdate({ prop: key, value });
+          if (prop === "value") {
+            this.emit("output", { prop: key, value });
           }
 
           return true;
@@ -546,9 +257,7 @@ export default class GraphItem {
       }
     );
 
-    if (calculateSize) {
-      this.calculateSize();
-    }
+    return id;
   }
 
   removeOutput(key) {
@@ -563,8 +272,6 @@ export default class GraphItem {
     this.parent.hitpoints.remove(hitpointId);
 
     delete this.outputs[key];
-
-    this.calculateSize();
   }
 
   removeInput(key) {
@@ -579,7 +286,5 @@ export default class GraphItem {
     this.parent.hitpoints.remove(hitpointId);
 
     delete this.inputs[key];
-
-    this.calculateSize();
   }
 }

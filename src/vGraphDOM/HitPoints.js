@@ -3,23 +3,23 @@ import uuid4 from "uuid/v4";
 import isIntersectPoint from "./util/is-intersect-point";
 import isIntersectRect from "./util/is-intersect-rect";
 
-export default class HitPoints {
+export class HitPoints {
   points = [];
 
   groups = {};
 
-  add(group, data, x1, y1, x2, y2) {
+  add(group, id = uuid4(), data, x1, y1, x2, y2) {
     if (!group) {
       throw new Error("Hit Point must have a group");
     }
 
     const point = {
-      id: uuid4(),
+      id,
       group,
       data
     };
 
-    if (arguments.length < 6) {
+    if (arguments.length < 7) {
       point.type = "radial";
       point.x = x1;
       point.y = y1;

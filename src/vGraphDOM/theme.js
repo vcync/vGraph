@@ -1,4 +1,4 @@
-export default {
+export const defaultTheme = {
   backgroundColor: "rgba(0,0,0)",
   backgroundOpacity: 0.5,
 

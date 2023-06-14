@@ -1,16 +1,19 @@
+import uuid4 from "uuid/v4";
 import { makeObjectWithLength } from "./util/make-object-with-length";
 
 import { Node } from "./Node";
 import SubGraph from "./SubGraph";
-import HitPoints from "./HitPoints";
+import { HitPoints } from "../vGraphDOM/HitPoints";
 
-export default class Graph {
+export class Graph {
   hitpoints = new HitPoints();
 
-  constructor(vGraph) {
+  activeNodeDrawOrder = [];
+  activeNodesExecOrder = [];
+
+  constructor(vGraph, id = uuid4()) {
     this.vGraph = vGraph;
-    this.activeNodeDrawOrder = [];
-    this.activeNodesExecOrder = [];
+    this.id = id;
 
     this.activeNodes = new Proxy(makeObjectWithLength(), {
       set: (obj, prop, value) => {
@@ -24,36 +27,27 @@ export default class Graph {
         const index = this.activeNodeDrawOrder.indexOf(prop);
         if (index > -1) {
           this.activeNodeDrawOrder.splice(index, 1);
-          // requestAnimationFrame(this.draw)
         }
         return true;
       }
     });
   }
 
-  createNode(name, x, y, id) {
-    const existingNode = this.vGraph.availableNodes.find(
-      node => node.name === name
-    );
-    if (!existingNode) {
-      throw Error(`Cannot find a registered node with the name "${name}"`);
-    }
-
+  createNode(nodeDefinition, id) {
     let newNode;
 
-    if (existingNode.isSubgraph) {
-      newNode = new SubGraph(this, x, y, existingNode, id);
+    if (nodeDefinition.isSubgraph) {
+      newNode = new SubGraph(this, nodeDefinition, id);
       newNode.isSubgraph = true;
       newNode.graph.parent = this;
       newNode.graph.parentNode = newNode;
       newNode.graph.parentId = this.id || "top";
     } else {
-      newNode = new Node(this, x, y, existingNode, id);
+      newNode = new Node(this, nodeDefinition, id);
     }
 
     this.activeNodes[newNode.id] = newNode;
 
-    // requestAnimationFrame(this.draw)
     return newNode;
   }
 
@@ -222,7 +216,6 @@ export default class Graph {
     }
 
     delete activeNodes[node.id];
-    // requestAnimationFrame(this.draw)
   }
 
   deleteNodeById(nodeId) {

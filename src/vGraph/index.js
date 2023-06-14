@@ -1,139 +1,106 @@
-import randomColor from "randomcolor";
-import Theme from "../ecosystem-theme";
-import createCanvas from "./util/create-canvas";
-import "./util/rounded-rectangle";
+import EventEmitter from "eventemitter3";
+import { Graph } from "./Graph";
 
-import resize from "./resize";
-import draw from "./draw";
-import interaction from "./interaction";
-import wheel from "./wheel";
-import keydown from "./keydown";
-import keyup from "./keyup";
-import dblclick from "./dblclick";
-import contextmenu from "./contextmenu";
-import HitPoints from "./HitPoints";
-import InputStatus from "./InputStatus";
+function doTraversal(delta, graph) {
+  const {
+    activeNodesExecOrder,
+    activeNodesExecOrder: { length: activeNodesExecOrderLength },
+    activeNodes
+  } = graph;
 
-import SubGraphNode from "./nodes/SubGraph";
+  const inputCheck = {};
 
-import Graph from "./Graph";
+  const traverseTree = node => {
+    const inputs = node.inputs;
 
-import defaultTheme from "./theme";
+    if (inputs.$connected && !inputCheck[node.id]) {
+      inputCheck[node.id] = 1;
+    } else if (inputs.$connected) {
+      inputCheck[node.id] += 1;
+    }
 
-const hasDom = !(typeof window === "undefined");
+    if (
+      inputs.$length &&
+      inputs.$connected &&
+      (inputCheck[node.id] < inputs.$connected ||
+        inputCheck[node.id] > inputs.$connected)
+    ) {
+      return;
+    }
 
-let aEl, rEl;
-if (hasDom) {
-  aEl = window.addEventListener;
-  rEl = window.addEventListener;
+    if (node.exec) {
+      let canExec = true;
+      if (node.outputs.$required.length) {
+        canExec = node.outputs.$required.every(
+          outputName => node.outputs[outputName].connections.length
+        );
+      }
+
+      if (canExec) {
+        try {
+          node.exec({
+            inputs: node.inputs,
+            outputs: node.outputs,
+            delta
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
+    if (node.isSubgraph) {
+      doTraversal(delta, node.graph);
+    }
+
+    const outputs = Object.values(node.outputs);
+
+    for (let i = 0; i < outputs.length; ++i) {
+      const outputConnections = outputs[i].connections;
+
+      for (let j = 0; j < outputConnections.length; ++j) {
+        const toNode = node.parent.activeNodes[outputConnections[j][0]];
+        const inputName = outputConnections[j][1];
+        toNode.inputs[inputName].value = node.outputs[outputs[i].key].value;
+
+        traverseTree(toNode);
+      }
+    }
+  };
+
+  for (let i = 0; i < activeNodesExecOrderLength; ++i) {
+    const nodeId = activeNodesExecOrder[i];
+    traverseTree(activeNodes[nodeId]);
+  }
 }
 
-export class vGraph {
-  _hasDom = hasDom;
+export class vGraph extends EventEmitter {
+  types = new Set();
 
-  resize = resize.bind(this);
-  draw = draw.bind(this);
-  wheel = wheel.bind(this);
-  keydown = keydown.bind(this);
-  keyup = keyup.bind(this);
-  dblclick = dblclick.bind(this);
-  contextmenu = contextmenu.bind(this);
+  events = {
+    REGISTER_NODE: Symbol("REGISTER_NODE"),
+    CREATE_NODE: Symbol("CREATE_NODE"),
+    DELETE_NODE: Symbol("DELETE_NODE"),
+    TYPE_ADDED: Symbol("TYPE_ADDED")
+  };
 
-  hitpoints = new HitPoints();
-  ecosystemTheme = new Theme();
-
-  constructor(context = createCanvas(128, 128), theme = defaultTheme) {
-    this.debug = {
-      hitpoints: false,
-      executionOrder: false
-    };
+  constructor() {
+    super();
 
     this.graph = new Graph(this);
 
-    this.context = context;
-    this.canvas = context.canvas;
-
-    this.theme = theme;
-    this.ecosystemTheme.install(document.body, this.applyTheme.bind(this));
-    this.ecosystemTheme.start();
-
-    if (hasDom) {
-      this.widgetOverlay = document.createElement("div");
-      this.widgetOverlay.id = "vgraph-widgets";
-      this.inputStatus = new InputStatus(this, this.widgetOverlay);
-      interaction.bind(this)();
-    }
-
-    this.colors = [];
-    this.colors.any = {
-      light: randomColor({
-        luminosity: "light",
-        seed: "any"
-      }),
-      bright: randomColor({
-        luminosity: "bright",
-        seed: "any"
-      }),
-      dark: randomColor({
-        luminosity: "dark",
-        seed: "any"
-      })
-    };
-    this.types = ["any"];
-
-    this.availableNodes = [];
-
-    this.dpr = 1;
-    this.scale = 1;
-    this.setScale = newScale => {
-      if (
-        (this.scale >= this.minScale && newScale > 0) ||
-        (this.scale > this.minScale && newScale < 0)
-      ) {
-        this.scale += newScale * this.scale;
-      }
-
-      if (this.scale < this.minScale && newScale < 0) {
-        this.scale = this.minScale;
-      }
-    };
-    this.minScale = 0.1;
-    this.scaleOffsetX = 0;
-    this.scaleOffsetY = 0;
-    this.pointRadius = 5;
-    this.tooltip = "";
-
-    this.startPoint = false;
-    this.endPoint = false;
-
-    this.focusedNodes = [];
-
-    this.showUi = true;
+    this.addType("any");
 
     this.graphToEdit = this.graph;
-
-    this.registerNode(SubGraphNode);
-
-    if (hasDom) {
-      aEl("resize", this.resize);
-      this.resize();
-      aEl("wheel", this.wheel, { passive: false });
-      aEl("keydown", this.keydown);
-      aEl("keyup", this.keyup);
-      aEl("dblclick", this.dblclick);
-      aEl("contextmenu", this.contextmenu);
-    }
   }
 
-  destroy() {
-    if (hasDom) {
-      rEl("resize", this.resize);
-      rEl("wheel", this.wheel);
-      rEl("keydown", this.keydown);
-      rEl("keyup", this.keyup);
-      rEl("dblclick", this.dblclick);
-      rEl("contextmenu", this.contextmenu);
+  addType(type) {
+    if (this.types.has(type)) {
+      return;
     }
+
+    this.types.add(type);
+    this.emit(this.events.TYPE_ADDED, type);
   }
 
   get editingSubGraph() {
@@ -155,149 +122,26 @@ export class vGraph {
    * @param {NodeDefinition} nodeDefinition
    */
   registerNode(node) {
-    if (Array.isArray(node)) {
-      node.forEach(item => this.registerNode(item));
-      return;
-    }
-
-    this.availableNodes.push(node);
-
     /* @todo Optimise this */
     [
       ...Object.values(node.outputs || {}),
       ...Object.values(node.inputs || {})
     ].forEach(connection => {
-      if (this.colors[connection.type]) {
-        return;
-      }
-
-      this.colors[connection.type] = {
-        light: randomColor({
-          luminosity: "light",
-          seed: connection.type
-        }),
-        bright: randomColor({
-          luminosity: "bright",
-          seed: connection.type
-        }),
-        dark: randomColor({
-          luminosity: "dark",
-          seed: connection.type
-        })
-      };
-
-      this.types.push(connection.type);
+      this.addType(connection.type);
     });
+
+    this.emit(this.events.REGISTER_NODE, node);
   }
 
-  createNode() {
-    const newNode = this.graphToEdit.createNode(...arguments);
+  createNode(name) {
+    const newNode = this.graphToEdit.createNode(name);
 
-    requestAnimationFrame(this.draw);
-    return newNode;
-  }
-
-  moveNode(id, x, y) {
-    const { activeNodes } = this.graphToEdit;
-    const node = activeNodes[id];
-    node.position = [x, y];
-  }
-
-  cloneNode(id) {
-    if (Array.isArray(id)) {
-      return id.map(item => this.cloneNode(item));
-    }
-
-    const node = this.graphToEdit.activeNodes[id];
-    if (!node) {
-      throw new Error("Cannot find active node in graph with id", id);
-    }
-
-    const { dpr } = this;
-
-    const newNode = this.createNode(
-      node.name,
-      node.x + 32 * dpr,
-      node.y + 32 * dpr
-    );
+    this.emit(this.events.CREATE_NODE, newNode);
     return newNode;
   }
 
   updateTree(delta) {
-    function doTraversal(graph) {
-      const {
-        activeNodesExecOrder,
-        activeNodesExecOrder: { length: activeNodesExecOrderLength },
-        activeNodes
-      } = graph;
-
-      const inputCheck = {};
-
-      const traverseTree = node => {
-        const inputs = node.inputs;
-
-        if (inputs.$connected && !inputCheck[node.id]) {
-          inputCheck[node.id] = 1;
-        } else if (inputs.$connected) {
-          inputCheck[node.id] += 1;
-        }
-
-        if (
-          inputs.$length &&
-          inputs.$connected &&
-          (inputCheck[node.id] < inputs.$connected ||
-            inputCheck[node.id] > inputs.$connected)
-        ) {
-          return;
-        }
-
-        if (node.exec) {
-          let canExec = true;
-          if (node.outputs.$required.length) {
-            canExec = node.outputs.$required.every(
-              outputName => node.outputs[outputName].connections.length
-            );
-          }
-
-          if (canExec) {
-            try {
-              node.exec({
-                inputs: node.inputs,
-                outputs: node.outputs,
-                delta
-              });
-            } catch (e) {
-              console.error(e);
-            }
-          }
-        }
-
-        if (node.isSubgraph) {
-          doTraversal(node.graph);
-        }
-
-        const outputs = Object.values(node.outputs);
-
-        for (let i = 0; i < outputs.length; ++i) {
-          const outputConnections = outputs[i].connections;
-
-          for (let j = 0; j < outputConnections.length; ++j) {
-            const toNode = node.parent.activeNodes[outputConnections[j][0]];
-            const inputName = outputConnections[j][1];
-            toNode.inputs[inputName].value = node.outputs[outputs[i].key].value;
-
-            traverseTree(toNode);
-          }
-        }
-      };
-
-      for (let i = 0; i < activeNodesExecOrderLength; ++i) {
-        const nodeId = activeNodesExecOrder[i];
-        traverseTree(activeNodes[nodeId]);
-      }
-    }
-
-    doTraversal(this.graph);
+    doTraversal(delta, this.graph);
   }
 
   connect(node1, outputName, node2, inputName) {
@@ -462,8 +306,9 @@ export class vGraph {
       this.disconnectOutput(node.id, outputName);
     }
 
+    this.emit(this.events.DELETE_NODE, node.id);
+
     delete activeNodes[node.id];
-    requestAnimationFrame(this.draw);
   }
 
   deleteNodeById(nodeId) {
@@ -551,36 +396,5 @@ export class vGraph {
         }
       }
     }
-  }
-
-  applyTheme(newTheme) {
-    const { theme } = this;
-    /* eslint-disable camelcase */
-    /* eslint-disable no-unused-vars */
-
-    const {
-      b_high,
-      b_inv,
-      b_low,
-      b_med,
-      background,
-      f_high,
-      f_inv,
-      f_low,
-      f_med
-    } = newTheme;
-
-    theme.backgroundColor = background;
-    theme.node.backgroundColor = b_low;
-    theme.node.focusedBackgroundColor = f_low;
-    theme.node.outlineColor = f_high;
-    theme.node.textColor = b_high;
-    theme.node.focusedTextColor = f_high;
-    theme.node.titleColor = f_high;
-    theme.node.focusedOutlineColor = b_inv;
-    theme.node.focusedTitleColor = b_inv;
-    theme.tooltip.textColor = f_high;
-
-    requestAnimationFrame(this.draw);
   }
 }

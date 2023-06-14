@@ -1,4 +1,4 @@
-export default function createCanvas(
+export function createCanvas(
   width = 128,
   height = 128,
   type = "2d",

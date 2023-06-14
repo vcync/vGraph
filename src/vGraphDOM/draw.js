@@ -1,8 +1,6 @@
-export default function draw() {
-  if (!this._hasDom) {
-    return;
-  }
+import { drawGraphItem } from "./drawGraphItem";
 
+export function draw() {
   const {
     canvas: { width, height },
     colors,
@@ -19,9 +17,11 @@ export default function draw() {
   const {
     activeNodes,
     activeNodeDrawOrder,
-    activeNodeDrawOrder: { length: activeNodeDrawOrderLength },
-    hitpoints: { points }
+    activeNodeDrawOrder: { length: activeNodeDrawOrderLength }
   } = graphToEdit;
+
+  const hitpoints = this.graphHitpoints[graphToEdit.id];
+  const { points } = hitpoints;
 
   const { connectionWidth } = theme;
 
@@ -42,28 +42,27 @@ export default function draw() {
   context.save();
   context.lineCap = "round";
   context.lineWidth = connectionWidth * dpr;
-  // context.shadowColor = 'rgba(0,0,0,0.4)'
-  // context.shadowBlur = 15
 
   for (let i = 0; i < activeNodeDrawOrderLength; ++i) {
     const node = activeNodes[activeNodeDrawOrder[i]];
 
     const outputs = Object.values(node.outputs);
     for (let j = 0; j < outputs.length; ++j) {
-      const {
-        connections,
-        hitpoint: { x: x1, y: y1 },
-        type
-      } = outputs[j];
+      const { connections, type, id: outputId } = outputs[j];
+
+      const { x: x1, y: y1 } = hitpoints.points.find(
+        ({ id }) => id === outputId
+      );
 
       for (let k = 0; k < connections.length; ++k) {
         const [nodeId, inputName] = connections[k];
         const endNode = activeNodes[nodeId];
         const input = endNode.inputs[inputName];
-        const {
-          hitpoint: { x: x2, y: y2 },
-          type: endType
-        } = input;
+        const { type: endType, id: inputId } = input;
+
+        const { x: x2, y: y2 } = hitpoints.points.find(
+          ({ id }) => id === inputId
+        );
 
         let brightColor = colors[type].bright;
         let lightColor = colors[type].light;
@@ -132,7 +131,19 @@ export default function draw() {
   }
 
   for (let i = 0; i < activeNodeDrawOrderLength; ++i) {
-    activeNodes[activeNodeDrawOrder[i]].draw();
+    const { focusedNodes, startPoint, endPoint, theme, colors } = this;
+    const node = activeNodes[activeNodeDrawOrder[i]];
+    const { id, name, title, inputs, outputs } = node;
+
+    // Get the positional data from vGraphDOM
+    const { x, y, width, height } = this.activeNodes[id];
+
+    const hitpoints = this.graphHitpoints[this.graphToEdit.id];
+
+    drawGraphItem(
+      { context, dpr, focusedNodes, startPoint, endPoint, theme, colors },
+      { x, y, width, height, id, title, name, inputs, outputs, hitpoints }
+    );
   }
 
   if (this.inputStatus.action === "selectiondrawing") {
@@ -178,6 +189,7 @@ export default function draw() {
   if (this.debug.hitpoints) {
     context.strokeStyle = "red";
     context.fillStyle = "rgba(255,0,0,0.1)";
+
     points.forEach(point => {
       const { x, y, radius, x1, y1, x2, y2, type } = point;
 
@@ -197,12 +209,13 @@ export default function draw() {
 
   if (this.debug.executionOrder) {
     context.fillStyle = "#f2bd09";
-    for (let i = 0; i < activeNodeDrawOrderLength; ++i) {
-      context.fillText(
-        i,
-        activeNodes[this.activeNodesExecOrder[i]].hitpoint.x1,
-        activeNodes[this.activeNodesExecOrder[i]].hitpoint.y1
+    for (let i = 0; i < this.graphToEdit.activeNodesExecOrder.length; ++i) {
+      const { id: nodeId } = this.graphToEdit.activeNodesExecOrder[i];
+      const { x1, y1 } = this.graphHitpoints[this.graphToEdit.id].find(
+        ({ id }) => id === nodeId
       );
+
+      context.fillText(i, x1, y1);
     }
   }
 

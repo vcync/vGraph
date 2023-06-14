@@ -1,6 +1,6 @@
 export default function dblclick(e) {
   const { graphToEdit } = this;
-  const { hitpoints } = graphToEdit;
+  const hitpoints = this.graphHitpoints[graphToEdit.id];
 
   const { point } = hitpoints.hasIntersect(
     "node",
@@ -19,7 +19,7 @@ export default function dblclick(e) {
       this.focusedNodes.push(graphToEdit);
     }
 
-    this.graphToEdit = graphToEdit.parent || this.graph;
+    this.graphToEdit = graphToEdit.parent || this.vGraphCore.graph;
   }
 
   requestAnimationFrame(this.draw);
