@@ -121,16 +121,16 @@ export class vGraph extends EventEmitter {
    * Adds a Node Definition to vGraph
    * @param {NodeDefinition} nodeDefinition
    */
-  registerNode(node) {
+  registerNode(nodeDefinition) {
     /* @todo Optimise this */
     [
-      ...Object.values(node.outputs || {}),
-      ...Object.values(node.inputs || {})
+      ...Object.values(nodeDefinition.outputs || {}),
+      ...Object.values(nodeDefinition.inputs || {})
     ].forEach(connection => {
       this.addType(connection.type);
     });
 
-    this.emit(this.events.REGISTER_NODE, node);
+    this.emit(this.events.REGISTER_NODE, nodeDefinition);
   }
 
   createNode(name) {

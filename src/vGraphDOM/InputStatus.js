@@ -1,4 +1,4 @@
-import uuid4 from "uuid/v4";
+import { v4 as uuidv4 } from "uuid";
 
 function getInputCoords(e) {
   if (typeof e.clientX === "number") {
@@ -115,7 +115,7 @@ export class InputStatus {
   watch(event) {
     const argsLength = arguments.length;
 
-    const id = uuid4();
+    const id = uuidv4();
 
     // if (!this[`${event}Watchers`]) {
     //   this[`${event}Watchers`] = {}

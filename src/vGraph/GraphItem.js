@@ -1,8 +1,8 @@
-import uuid4 from "uuid/v4";
+import { v4 as uuidv4 } from "uuid";
 import EventEmitter from "eventemitter3";
 
 export default class GraphItem extends EventEmitter {
-  constructor(graph, options, id = uuid4()) {
+  constructor(graph, options, id = uuidv4()) {
     super();
     this.parent = graph;
 
@@ -187,7 +187,7 @@ export default class GraphItem extends EventEmitter {
       parent: { vGraph }
     } = this;
 
-    const id = uuid4();
+    const id = uuidv4();
 
     this.inputs[key] = new Proxy(
       {
@@ -227,7 +227,7 @@ export default class GraphItem extends EventEmitter {
   }
 
   addOutput(key, value) {
-    const id = uuid4();
+    const id = uuidv4();
 
     this.outputs[key] = new Proxy(
       {
