@@ -9,9 +9,5 @@ export class Node extends GraphItem {
 
   destroy() {
     super.destroy();
-
-    if (this.domElement) {
-      this.domElement.remove();
-    }
   }
 }
