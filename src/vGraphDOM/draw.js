@@ -77,13 +77,16 @@ export function draw() {
           lightColor.addColorStop(1, colors[endType].light);
         }
 
+        const isBehindStart = x2 < x1;
+        const factor = isBehindStart ? 0.7 : 0.5;
+
         context.strokeStyle = colors[type].bright;
         context.beginPath();
         context.moveTo(x1 + 0.5, y1 + 0.5);
         context.bezierCurveTo(
-          x1 + Math.abs(x2 - x1) / 2,
+          x1 + Math.abs(x2 - x1) * factor,
           y1,
-          x2 - Math.abs(x2 - x1) / 2,
+          x2 - Math.abs(x2 - x1) * factor,
           y2,
           x2 + 0.5,
           y2 + 0.5
@@ -95,6 +98,11 @@ export function draw() {
         context.strokeStyle = lightColor;
         context.lineWidth = connectionWidth * dpr;
         context.stroke();
+
+        if (this.debug.beziers) {
+          context.fillRect(x1 + Math.abs(x2 - x1) * factor, y1, 10, 10);
+          context.fillRect(x2 - Math.abs(x2 - x1) * factor, y2, 10, 10);
+        }
       }
     }
   }
@@ -105,15 +113,18 @@ export function draw() {
     const x = startPoint.x;
     const y = startPoint.y;
 
+    const isBehindStart = this.inputStatus.x < x;
+    const factor = isBehindStart ? 0.7 : 0.5;
+
     context.save();
     context.lineCap = "round";
     context.lineWidth = 4 * dpr;
     context.beginPath();
     context.moveTo(x + 0.5, y + 0.5);
     context.bezierCurveTo(
-      x + Math.abs(this.inputStatus.x - x) / 2,
+      x + Math.abs(this.inputStatus.x - x) * factor,
       y,
-      this.inputStatus.x - Math.abs(this.inputStatus.x - x) / 2,
+      this.inputStatus.x - Math.abs(this.inputStatus.x - x) * factor,
       this.inputStatus.y,
       this.inputStatus.x + 0.5,
       this.inputStatus.y + 0.5
@@ -126,6 +137,21 @@ export function draw() {
     context.strokeStyle = colors[startPoint.data.dataType].light;
     context.lineWidth = connectionWidth * dpr;
     context.stroke();
+
+    if (this.debug.beziers) {
+      context.fillRect(
+        x + Math.abs(this.inputStatus.x - x) * factor,
+        y,
+        10,
+        10
+      );
+      context.fillRect(
+        this.inputStatus.x - Math.abs(this.inputStatus.x - x) * factor,
+        this.inputStatus.y,
+        10,
+        10
+      );
+    }
 
     context.restore();
   }
@@ -164,12 +190,13 @@ export function draw() {
 
   for (let i = 0; i < widgetsLength; ++i) {
     const widget = widgets[i];
-    const node = this.activeNodes[widget.id];
+    const node = activeNodes[widget.id];
     if (!node) {
       widget.style.display = "none";
     } else {
-      const x = (node.x + (scaleOffsetX * width) / scale) / dpr;
-      const y = (node.y + (scaleOffsetY * height) / scale) / dpr;
+      const nodeSize = this.activeNodes[widget.id];
+      const x = (nodeSize.x + (scaleOffsetX * width) / scale) / dpr;
+      const y = (nodeSize.y + (scaleOffsetY * height) / scale) / dpr;
 
       widget.style.transform = `translate(${x}px, ${y}px)`;
       widget.style.display = "flex";

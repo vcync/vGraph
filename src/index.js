@@ -9,6 +9,7 @@ import modVNodes from "./vGraph/nodes/modv";
 import inputNodes from "./vGraph/nodes/input";
 import outputNodes from "./vGraph/nodes/output";
 import numberNodes from "./vGraph/nodes/number";
+import logicNodes from "./vGraph/nodes/logic";
 import { Menu, MenuItem } from "./nwjs-menu-browser";
 import { vGraphDOM } from "./vGraphDOM";
 
@@ -53,6 +54,7 @@ async function setup() {
   dom.registerNode(inputNodes);
   dom.registerNode(outputNodes);
   dom.registerNode(numberNodes);
+  dom.registerNode(logicNodes);
 
   dom.registerNode({
     name: "modV/visualInput",
@@ -239,6 +241,17 @@ async function setup() {
       type: "checkbox",
       click() {
         dom.debug.executionOrder = !dom.debug.executionOrder;
+        dom.redraw();
+      }
+    })
+  );
+
+  debugMenu.append(
+    new MenuItem({
+      label: "Beziers",
+      type: "checkbox",
+      click() {
+        dom.debug.beziers = !dom.debug.beziers;
         dom.redraw();
       }
     })

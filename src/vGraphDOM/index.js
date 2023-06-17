@@ -73,7 +73,8 @@ export class vGraphDOM {
   constructor(context = createCanvas(128, 128), theme = defaultTheme) {
     this.debug = {
       hitpoints: false,
-      executionOrder: false
+      executionOrder: false,
+      beziers: false
     };
 
     this.context = context;
@@ -110,6 +111,7 @@ export class vGraphDOM {
   set graphToEdit(graph) {
     this._graphToEdit = graph;
     this.vGraphCore.graphToEdit = graph;
+    this.redraw();
   }
 
   get graphToEdit() {
