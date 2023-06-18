@@ -1,5 +1,7 @@
-import { CanvasTextWrapper } from "canvas-text-wrapper";
+import ctw from "canvas-text-wrapper/canvas-text-wrapper.js";
 import * as Types from "../../../index";
+
+const CanvasTextWrapper = ctw.CanvasTextWrapper;
 
 const textCanvas = document.createElement("canvas");
 const textContext = textCanvas.getContext("2d");
@@ -121,11 +123,16 @@ export default {
       textContext.lineWidth = strokeSize;
       textContext.clearRect(0, 0, width, height);
 
+      const offsetX = -(width * inputs.positionX.value);
+      const offsetY = -(height * inputs.positionY.value);
+
       CanvasTextWrapper(textCanvas, text, {
         font: `${weight} ${size}px ${font}`,
         verticalAlign: "middle",
         textAlign: "center",
-        strokeText: stroke
+        strokeText: stroke,
+        offsetX,
+        offsetY
       });
 
       context.drawImage(textCanvas, 0, 0);

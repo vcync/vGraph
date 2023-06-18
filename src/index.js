@@ -199,8 +199,7 @@ async function setup() {
               new MenuItem({
                 label,
                 click() {
-                  vGraph.reset();
-                  vGraph.loadData(saves[label]);
+                  dom.loadData(saves[label]);
                 }
               })
             )

@@ -262,8 +262,9 @@ export class vGraphDOM {
     this.redraw();
   }
 
-  createNode(name, x, y) {
-    let nodeDefinition = name;
+  createNode(name, x, y, id) {
+    /** @type {import("../vGraph").NodeDefinition} */
+    let nodeDefinition;
 
     if (typeof name === "string") {
       nodeDefinition = this.availableNodes.find(node => node.name === name);
@@ -273,7 +274,7 @@ export class vGraphDOM {
       }
     }
 
-    const node = this.graphToEdit.createNode(nodeDefinition);
+    const node = this.graphToEdit.createNode(nodeDefinition, id);
 
     const { dpr, theme, graphHitpoints } = this;
     const maxNodes = Math.max(node.inputs.$length, node.outputs.$length);
@@ -317,7 +318,7 @@ export class vGraphDOM {
         },
 
         outputUpdate: callback => {
-          node.on("update", o => console.log(o));
+          node.on("output", callback);
         }
       });
 
@@ -407,7 +408,7 @@ export class vGraphDOM {
     );
   }
 
-  deleteNode(nodes) {
+  deleteNode(nodes, callVGraph = true) {
     if (Array.isArray(nodes)) {
       return nodes.map(item => this.deleteNode(item));
     }
@@ -415,8 +416,8 @@ export class vGraphDOM {
     const { graphHitpoints } = this;
     const { ref: node, domElement } = this.activeNodes[nodes.id];
 
-    if (this.domElement) {
-      this.domElement.remove();
+    if (domElement) {
+      domElement.remove();
     }
 
     const hitpoints = graphHitpoints[node.graph.id];
@@ -427,7 +428,10 @@ export class vGraphDOM {
       ...Object.values(node.inputs).map(input => input.id)
     ].forEach(id => hitpoints.remove(id));
 
-    this.vGraphCore.deleteNode(node);
+    if (callVGraph) {
+      this.vGraphCore.deleteNode(node);
+    }
+
     delete this.activeNodes[node.id];
   }
 
@@ -571,8 +575,68 @@ export class vGraphDOM {
   }
 
   DELETE_NODE_eventHandler(nodeId) {
-    delete this.activeNodes[nodeId];
+    delete this.deleteNode(this.activeNodes[nodeId], false);
 
     this.redraw();
+  }
+
+  fromJSON(json) {
+    const data = JSON.parse(json);
+    this.loadData(data);
+  }
+
+  loadData(data) {
+    this.graphToEdit = this.vGraphCore.graph;
+    this.vGraphCore.reset();
+
+    const {
+      order,
+      order: { length: orderLength },
+      nodes
+    } = data;
+
+    const { activeNodes } = this.graphToEdit;
+
+    for (let i = 0; i < orderLength; ++i) {
+      const node = nodes[order[i]];
+      this.createNode(node.name, node.x * this.dpr, node.y * this.dpr, node.id);
+    }
+
+    for (let i = 0; i < orderLength; ++i) {
+      const node = nodes[order[i]];
+
+      const inputKeys = Object.keys(node.inputs);
+      const inputKeysLength = inputKeys.length;
+
+      for (let j = 0; j < inputKeysLength; ++j) {
+        const inputName = inputKeys[j];
+        const input = node.inputs[inputName];
+        activeNodes[node.id].inputs[inputName].value = input.value;
+      }
+
+      const outputKeys = Object.keys(node.outputs);
+      const outputKeysLength = outputKeys.length;
+
+      for (let j = 0; j < outputKeysLength; ++j) {
+        const outputName = outputKeys[j];
+        const output = node.outputs[outputName];
+
+        activeNodes[node.id].outputs[outputName].value = output.value;
+
+        const connections = output.connections;
+        const connectionsLength = connections.length;
+
+        if (connectionsLength) {
+          for (let k = 0; k < connectionsLength; ++k) {
+            const connection = connections[k];
+            const node1 = activeNodes[node.id];
+
+            const node2 = activeNodes[connection[0]];
+            const inputName = connection[1];
+            this.connect(node1, outputName, node2, inputName);
+          }
+        }
+      }
+    }
   }
 }

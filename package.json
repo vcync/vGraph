@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "start": "parcel index.html --open",
+    "start": "parcel index.html",
     "build": "parcel build index.html"
   },
   "dependencies": {
-    "canvas-text-wrapper": "0.10.2",
+    "canvas-text-wrapper": "github:cyberj/canvas-text-wrapper#master",
     "eventemitter3": "^5.0.1",
     "meyda": "4.2.0",
     "randomcolor": "^0.6.2",
