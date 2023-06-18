@@ -1,3 +1,6 @@
+import { vGraphDOM } from ".";
+
+/** @this vGraphDOM */
 export function resize() {
   const { canvas } = this;
   const { devicePixelRatio: dpr, innerWidth, innerHeight } = window;

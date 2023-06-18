@@ -1,9 +1,9 @@
 import Meyda from "meyda";
+import * as Types from "../../index";
 
 let meyda;
 (async () => {
   const isSafari = navigator.vendor === "Apple Computer, Inc.";
-  console.log(isSafari);
 
   const AudioContext = window.AudioContext || window.webkitAudioContext;
 
@@ -73,6 +73,9 @@ function getFeatures(delta) {
   lastFrameId = delta;
 }
 
+/**
+ * @type {Types.NodeDefinition[]}
+ */
 export default [
   {
     name: "meyda/energy",
@@ -84,7 +87,7 @@ export default [
         default: 0
       }
     },
-    exec({ inputs, outputs, delta }) {
+    exec({ outputs, delta }) {
       getFeatures(delta);
       outputs["energy"].value = features.energy;
     }
@@ -100,7 +103,7 @@ export default [
         default: 0
       }
     },
-    exec({ inputs, outputs, delta }) {
+    exec({ outputs, delta }) {
       getFeatures(delta);
       outputs["rms"].value = features.rms;
     }
@@ -116,7 +119,7 @@ export default [
         default: 0
       }
     },
-    exec({ inputs, outputs, delta }) {
+    exec({ outputs, delta }) {
       getFeatures(delta);
       outputs["zcr"].value = features.zcr;
     }

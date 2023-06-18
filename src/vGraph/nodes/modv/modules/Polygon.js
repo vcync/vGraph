@@ -1,3 +1,5 @@
+import * as Types from "../../../index";
+
 function polygon(ctx, x, y, radius, sides, startAngle, anticlockwise) {
   if (sides < 3) return;
 
@@ -20,6 +22,9 @@ const polygonCanvas = document.createElement("canvas");
 const polygonContext = polygonCanvas.getContext("2d");
 polygonCanvas.width = polygonCanvas.height = 500;
 
+/**
+ * @type {Types.NodeDefinition}
+ */
 export default {
   name: "modV/module/polygon",
   group: "modV/module",

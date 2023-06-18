@@ -2,6 +2,8 @@ import { v4 as uuidv4 } from "uuid";
 import EventEmitter from "eventemitter3";
 
 export default class GraphItem extends EventEmitter {
+  state = {};
+
   constructor(graph, options, id = uuidv4()) {
     super();
     this.parent = graph;
@@ -96,6 +98,10 @@ export default class GraphItem extends EventEmitter {
     if (options.init) {
       this.init = options.init;
       this.init();
+    }
+
+    if (options.state) {
+      this.state = options.state();
     }
 
     if (options.inputs) {

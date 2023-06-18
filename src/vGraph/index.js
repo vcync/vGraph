@@ -1,6 +1,11 @@
 import EventEmitter from "eventemitter3";
 import { Graph } from "./Graph";
+import { Node } from "./Node";
 
+/**
+ * @param {number} delta
+ * @param {Graph} graph
+ */
 function doTraversal(delta, graph) {
   const {
     activeNodesExecOrder,
@@ -10,6 +15,9 @@ function doTraversal(delta, graph) {
 
   const inputCheck = {};
 
+  /**
+   * @param {Node} node
+   */
   const traverseTree = node => {
     const inputs = node.inputs;
 
@@ -74,6 +82,55 @@ function doTraversal(delta, graph) {
   }
 }
 
+/**
+ * @typedef InputDefinition
+ *
+ * @prop {string} type
+ * @prop {boolean} connectionRequired
+ * @prop {any} default
+ */
+
+/**
+ * @typedef OutputDefinition
+ *
+ * @prop {string} type
+ * @prop {boolean} connectionRequired
+ * @prop {any} default
+ */
+
+/**
+ * @typedef NodeInput
+ * @extends InputDefinition
+ * @prop {any} value
+ */
+
+/**
+ * @typedef NodeOutput
+ * @extends OutputDefinition
+ * @prop {any} value
+ */
+
+/**
+ * @typedef ExecCallbackContext
+ * @prop {Object<string, NodeInput>} inputs
+ * @prop {Object<string, NodeOutput>} outputs
+ */
+
+/**
+ * @callback ExecCallback
+ * @param {ExecCallbackContext} args
+ */
+
+/**
+ * @typedef NodeDefinition
+ *
+ * @prop {String} name
+ * @prop {String} description
+ * @prop {Object<string, InputDefinition>} inputs
+ * @prop {Object<string, OutputDefinition>} outputs
+ * @prop {ExecCallback} exec
+ */
+
 export class vGraph extends EventEmitter {
   types = new Set();
 
@@ -94,6 +151,10 @@ export class vGraph extends EventEmitter {
     this.graphToEdit = this.graph;
   }
 
+  /**
+   *
+   * @param {string} type
+   */
   addType(type) {
     if (this.types.has(type)) {
       return;
@@ -106,16 +167,6 @@ export class vGraph extends EventEmitter {
   get editingSubGraph() {
     return this.graphToEdit !== this;
   }
-
-  /**
-   * @typedef {Object} NodeDefinition
-   *
-   * @property {String}   name
-   * @property {String}   description
-   * @property {Object}   inputs
-   * @property {Object}   outputs
-   * @property {Function} exec
-   */
 
   /**
    * Adds a Node Definition to vGraph
@@ -133,6 +184,9 @@ export class vGraph extends EventEmitter {
     this.emit(this.events.REGISTER_NODE, nodeDefinition);
   }
 
+  /**
+   * @param {string} name
+   */
   createNode(name) {
     const newNode = this.graphToEdit.createNode(name);
 
@@ -140,10 +194,19 @@ export class vGraph extends EventEmitter {
     return newNode;
   }
 
+  /**
+   * @param {number} delta
+   */
   updateTree(delta) {
     doTraversal(delta, this.graph);
   }
 
+  /**
+   * @param {Node} node1
+   * @param {string} outputName
+   * @param {Node} node2
+   * @param {string} inputName
+   */
   connect(node1, outputName, node2, inputName) {
     if (node2.inputs[inputName].connection.length) {
       return;
@@ -155,6 +218,11 @@ export class vGraph extends EventEmitter {
     this.graphToEdit.updateExecOrder();
   }
 
+  /**
+   * @param {string} nodeId
+   * @param {string} inputName
+   * @param {bool} spliceOutput
+   */
   disconnect(nodeId, inputName, spliceOutput = true) {
     const { activeNodes } = this.graphToEdit;
 
@@ -177,6 +245,10 @@ export class vGraph extends EventEmitter {
     this.graphToEdit.updateExecOrder();
   }
 
+  /**
+   * @param {string} nodeId
+   * @param {string} outputName
+   */
   disconnectOutput(nodeId, outputName) {
     const { activeNodes } = this.graphToEdit;
 
@@ -190,6 +262,9 @@ export class vGraph extends EventEmitter {
     activeNodes[nodeId].outputs[outputName].connections = [];
   }
 
+  /**
+   * @param {string} nodeId
+   */
   isConnected(nodeId) {
     const { activeNodes } = this.graphToEdit;
 
@@ -213,6 +288,9 @@ export class vGraph extends EventEmitter {
     return hasConnection;
   }
 
+  /**
+   * @param {Node} node
+   */
   deleteNode(node) {
     if (Array.isArray(node)) {
       node.forEach(node => this.deleteNode(node));
@@ -254,6 +332,9 @@ export class vGraph extends EventEmitter {
     delete activeNodes[node.id];
   }
 
+  /**
+   * @param {string} nodeId
+   */
   deleteNodeById(nodeId) {
     if (Array.isArray(nodeId)) {
       nodeId.forEach(id => this.deleteNodeById(id));

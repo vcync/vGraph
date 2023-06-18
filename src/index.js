@@ -10,6 +10,7 @@ import inputNodes from "./vGraph/nodes/input";
 import outputNodes from "./vGraph/nodes/output";
 import numberNodes from "./vGraph/nodes/number";
 import logicNodes from "./vGraph/nodes/logic";
+import midiNodes from "./vGraph/nodes/midi";
 import { Menu, MenuItem } from "./nwjs-menu-browser";
 import { vGraphDOM } from "./vGraphDOM";
 
@@ -55,6 +56,7 @@ async function setup() {
   dom.registerNode(outputNodes);
   dom.registerNode(numberNodes);
   dom.registerNode(logicNodes);
+  dom.registerNode(midiNodes);
 
   dom.registerNode({
     name: "modV/visualInput",

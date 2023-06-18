@@ -1,6 +1,8 @@
+import { vGraphDOM } from ".";
 import isIntersectRect from "./util/is-intersect-rect";
 
-export default function interaction() {
+/** @this vGraphDOM */
+export function interaction() {
   this.inputStatus.watch(
     "mousedown",
     "(Date.now() - lastDown) < 250 && button === 0",

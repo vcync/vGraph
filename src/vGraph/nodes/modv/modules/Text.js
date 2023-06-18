@@ -1,8 +1,12 @@
 import { CanvasTextWrapper } from "canvas-text-wrapper";
+import * as Types from "../../../index";
 
 const textCanvas = document.createElement("canvas");
 const textContext = textCanvas.getContext("2d");
 
+/**
+ * @type {Types.NodeDefinition}
+ */
 export default {
   name: "modV/module/text",
   group: "modV/module",

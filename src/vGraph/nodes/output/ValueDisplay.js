@@ -1,3 +1,8 @@
+import * as Types from "../../index";
+
+/**
+ * @type {Types.NodeDefinition}
+ */
 export default {
   name: "Value Display",
   group: "output",

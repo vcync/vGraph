@@ -1,3 +1,8 @@
+import * as Types from "../../index";
+
+/**
+ * @type {Types.NodeDefinition}
+ */
 export const TextDisplay = {
   name: "Text Display",
   group: "output",

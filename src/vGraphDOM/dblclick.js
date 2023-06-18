@@ -1,4 +1,7 @@
-export default function dblclick(e) {
+import { vGraphDOM } from ".";
+
+/** @this vGraphDOM */
+export function dblclick(e) {
   const { graphToEdit } = this;
   const hitpoints = this.graphHitpoints[graphToEdit.id];
 

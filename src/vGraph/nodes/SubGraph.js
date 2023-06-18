@@ -1,3 +1,9 @@
+import * as Types from "../index";
+
+/**
+ * @type {Types.NodeDefinition[]}
+ */
+
 export default [
   {
     name: "SubGraph",

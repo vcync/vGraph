@@ -9,52 +9,75 @@ import { createCanvas } from "./util/create-canvas";
 import { HitPoints } from "./HitPoints";
 import { draw } from "./draw";
 import { resize } from "./resize";
-import interaction from "./interaction";
-import wheel from "./wheel";
-import keydown from "./keydown";
-import keyup from "./keyup";
-import dblclick from "./dblclick";
-import contextmenu from "./contextmenu";
+import { interaction } from "./interaction";
+import { wheel } from "./wheel";
+import { keydown } from "./keydown";
+import { keyup } from "./keyup";
+import { dblclick } from "./dblclick";
+import { contextmenu } from "./contextmenu";
 import { defaultTheme } from "./theme";
 
 import { InputStatus } from "./InputStatus";
+import { Graph } from "../vGraph/Graph";
 
 const events = ["TYPE_ADDED", "CREATE_NODE", "DELETE_NODE"];
 
 const aEl = window.addEventListener;
 const rEl = window.addEventListener;
 
+/**
+ * @typedef TypeColors
+ * @prop {string} light
+ * @prop {string} bright
+ * @prop {string} dark
+ */
+
 export class vGraphDOM {
   _boundHandlers = {};
 
   showUi = true;
 
+  /** @type {null|vGraph} */
   vGraphCore = null;
+
+  /** @type {null|Graph} */
   _graphToEdit = null;
+
+  /** @type {Object.<string, TypeColors>} */
   colors = {};
+
+  /** @type {Node[]} */
   availableNodes = [];
+
+  /** @type {Object.<string, Node>} */
   activeNodes = {};
 
-  graphHitpoints = {
-    // graphId: new HitPoints()
-  };
+  /** @type {Object.<string, HitPoints>} */
+  graphHitpoints = {};
 
   ecosystemTheme = new Theme(/* TODO: set default */);
 
   startPoint = false;
   endPoint = false;
+
+  /** @type {Node[]} */
   focusedNodes = [];
 
+  /** @type {null|CanvasRenderingContext2D} */
   context = null;
+
+  /** @type {null|HTMLCanvasElement}  */
   canvas = null;
 
   widgetOverlay = null;
   widgetTransformArea = null;
-  inputStatus = null;
+
+  /** @type {InputStatus}  */
+  inputStatus;
 
   dpr = 1;
   scale = 1;
-  minScale = 0.1;
+  minScale = 0.5;
   scaleOffsetX = 0;
   scaleOffsetY = 0;
   tooltip = "";
@@ -281,6 +304,16 @@ export class vGraphDOM {
       const domElement = nodeDefinition.widget({
         setOutput: (name, value) => {
           node.outputs[name].value = value;
+        },
+
+        state: node.state,
+
+        getState: () => {
+          return node.state;
+        },
+
+        setState: state => {
+          node.state = state;
         },
 
         outputUpdate: callback => {

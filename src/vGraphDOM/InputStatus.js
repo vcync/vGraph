@@ -11,8 +11,8 @@ function getInputCoords(e) {
 }
 
 export class InputStatus {
-  constructor(vGraph, element = window) {
-    this.vGraph = vGraph;
+  constructor(vGraphDOM, element = window) {
+    this.vGraphDOM = vGraphDOM;
     this.element = element;
 
     this.mousedownWatchers = {};
@@ -143,7 +143,7 @@ export class InputStatus {
       scale,
       scaleOffsetX,
       scaleOffsetY
-    } = this.vGraph;
+    } = this.vGraphDOM;
 
     return [
       (x * dpr - scaleOffsetX * width) / scale,

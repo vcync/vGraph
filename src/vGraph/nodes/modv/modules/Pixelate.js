@@ -1,6 +1,11 @@
+import * as Types from "../../../index";
+
 const tempCanvas = document.createElement("canvas");
 const tempContext = tempCanvas.getContext("2d");
 
+/**
+ * @type {Types.NodeDefinition}
+ */
 export default {
   name: "modV/module/pixelate",
   group: "modV/module",

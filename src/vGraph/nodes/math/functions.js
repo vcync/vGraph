@@ -1,6 +1,12 @@
+import * as Types from "../../index";
+
+/**
+ * @type {Types.NodeDefinition[]}
+ */
 export default Object.getOwnPropertyNames(Math)
   .filter(fn => typeof Math[fn] === "function" && Math[fn].length < 3)
   .map(fn => {
+    /** @type {Types.NodeDefinition} */
     const node = {
       name: `math/function/${fn}`,
       group: "math/function",

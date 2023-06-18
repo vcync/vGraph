@@ -1,3 +1,6 @@
-export default function keydown(e) {
+import { vGraphDOM } from ".";
+
+/** @this vGraphDOM */
+export function keyup(e) {
   // Shift
 }

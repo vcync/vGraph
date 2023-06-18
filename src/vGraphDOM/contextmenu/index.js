@@ -1,3 +1,4 @@
+import { vGraphDOM } from ".";
 import getInputCoords from "../util/get-input-coords";
 import { buildNodeMenu } from "./build-node-menu";
 import { buildSubgraphMenuItems } from "./build-subgraph-menu-items";
@@ -5,7 +6,8 @@ import { MenuItem } from "../../nwjs-menu-browser";
 
 let menu;
 
-export default function contextmenu(e) {
+/** @this vGraphDOM */
+export function contextmenu(e) {
   e.preventDefault();
 
   const { dpr, focusedNodes } = this;

@@ -1,5 +1,7 @@
+import { vGraphDOM } from ".";
 import { drawGraphItem } from "./drawGraphItem";
 
+/** @this vGraphDOM */
 export function draw() {
   const {
     canvas: { width, height },
@@ -203,16 +205,6 @@ export function draw() {
     }
   }
 
-  context.fillStyle = theme.tooltip.textColor;
-
-  if (this.tooltip.length) {
-    context.fillText(
-      this.tooltip,
-      this.inputStatus.x + 16 * dpr,
-      this.inputStatus.y + 16 * dpr
-    );
-  }
-
   if (this.debug.hitpoints) {
     context.strokeStyle = "red";
     context.fillStyle = "rgba(255,0,0,0.1)";
@@ -247,6 +239,17 @@ export function draw() {
   }
 
   context.restore();
+
+  context.fillStyle = theme.tooltip.textColor;
+
+  if (this.tooltip.length) {
+    context.fillText(
+      this.tooltip,
+      this.inputStatus.x * scale + 16 * dpr,
+      this.inputStatus.y * scale + 16 * dpr
+    );
+  }
+
   let graphPath = "Main ";
   let currentGraph = graphToEdit;
   while (currentGraph.parent) {
