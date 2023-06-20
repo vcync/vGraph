@@ -639,4 +639,23 @@ export class vGraphDOM {
       }
     }
   }
+
+  toJSON() {
+    const { nodes, order } = this.vGraphCore.serialize();
+
+    const combinedData = Object.fromEntries(
+      Object.entries(nodes).map(([nodeId, data]) => {
+        return [
+          nodeId,
+          {
+            ...data,
+            x: this.activeNodes[nodeId].x,
+            y: this.activeNodes[nodeId].y
+          }
+        ];
+      })
+    );
+
+    return JSON.stringify({ nodes: combinedData, order });
+  }
 }

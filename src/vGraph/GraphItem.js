@@ -7,6 +7,7 @@ export default class GraphItem extends EventEmitter {
   constructor(graph, options, id = uuidv4()) {
     super();
     this.parent = graph;
+    this._dirty = false;
 
     const outputs = {};
 
@@ -84,7 +85,13 @@ export default class GraphItem extends EventEmitter {
     this.itemHitpoints = [];
 
     if (options.exec) {
-      this.exec = options.exec;
+      this.exec = (...args) => {
+        options.exec(...args);
+
+        if (this._dirty) {
+          this._dirty = false;
+        }
+      };
     }
 
     if (options.data) {
@@ -204,12 +211,14 @@ export default class GraphItem extends EventEmitter {
       },
       {
         set: (obj, prop, value) => {
-          obj[prop] = value;
-
           if (
             prop === "value" &&
             vGraph.graphToEdit === this.parent // possible optimisation?
           ) {
+            if (value !== obj[prop] && typeof value !== "object") {
+              this._dirty = true;
+            }
+
             this.emit("input", {
               inputs: this.inputs
             });
@@ -223,6 +232,8 @@ export default class GraphItem extends EventEmitter {
               this.inputs[key].value = value.default;
             }
           }
+
+          obj[prop] = value;
 
           return true;
         }

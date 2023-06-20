@@ -47,6 +47,7 @@ function doTraversal(delta, graph) {
       if (canExec) {
         try {
           node.exec({
+            dirty: node._dirty,
             inputs: node.inputs,
             outputs: node.outputs,
             delta
@@ -348,7 +349,7 @@ export class vGraph extends EventEmitter {
     this.deleteNodeById(Object.keys(this.graph.activeNodes));
   }
 
-  toJSON() {
+  serialize() {
     const {
       activeNodes,
       activeNodesExecOrder,
@@ -362,6 +363,10 @@ export class vGraph extends EventEmitter {
       output[id] = fromNode.toJSON(false);
     }
 
-    return JSON.stringify({ nodes: output, order: activeNodesExecOrder });
+    return { nodes: output, order: activeNodesExecOrder };
+  }
+
+  toJSON() {
+    return JSON.stringify(this.serialise());
   }
 }
