@@ -1,8 +1,50 @@
-import { CanvasTextWrapper } from "canvas-text-wrapper";
+import ctw from "canvas-text-wrapper/canvas-text-wrapper.js";
+import * as Types from "../../../index";
+
+const CanvasTextWrapper = ctw.CanvasTextWrapper;
 
 const textCanvas = document.createElement("canvas");
 const textContext = textCanvas.getContext("2d");
 
+function drawText({
+  textCanvas: { width, height },
+  textContext,
+  textCanvas,
+  fillColor,
+  strokeColor,
+  strokeSize,
+  text,
+  weight,
+  size,
+  font,
+  stroke,
+  fill,
+  offsetX,
+  offsetY
+}) {
+  if (fill) {
+    textContext.fillStyle = fillColor;
+  } else {
+    textContext.fillStyle = "rgba(0,0,0,0)";
+  }
+
+  textContext.strokeStyle = strokeColor;
+  textContext.lineWidth = strokeSize;
+  textContext.clearRect(0, 0, width, height);
+
+  CanvasTextWrapper(textCanvas, text, {
+    font: `${weight} ${size}px ${font}`,
+    verticalAlign: "middle",
+    textAlign: "center",
+    strokeText: stroke,
+    offsetX,
+    offsetY
+  });
+}
+
+/**
+ * @type {Types.NodeDefinition}
+ */
 export default {
   name: "modV/module/text",
   group: "modV/module",
@@ -79,6 +121,7 @@ export default {
       default: "#ffffff"
     }
   },
+
   outputs: {
     context: {
       type: "renderContext",
@@ -86,7 +129,9 @@ export default {
       default: undefined
     }
   },
-  exec({ inputs, outputs }) {
+
+  exec({ inputs, outputs, dirty }) {
+    let localDirty = dirty;
     const renderContext = inputs.context.value;
 
     if (renderContext) {
@@ -96,6 +141,7 @@ export default {
       if (textCanvas.width !== width || textCanvas.height !== height) {
         textCanvas.width = width;
         textCanvas.height = height;
+        localDirty = true;
       }
 
       const size = inputs.size.value;
@@ -108,21 +154,26 @@ export default {
       const fillColor = inputs.fillColor.value;
       const fill = inputs.fill.value;
 
-      if (fill) {
-        textContext.fillStyle = fillColor;
-      } else {
-        textContext.fillStyle = "rgba(0,0,0,0)";
-      }
-      textContext.strokeStyle = strokeColor;
-      textContext.lineWidth = strokeSize;
-      textContext.clearRect(0, 0, width, height);
+      const offsetX = -(width * inputs.positionX.value);
+      const offsetY = -(height * inputs.positionY.value);
 
-      CanvasTextWrapper(textCanvas, text, {
-        font: `${weight} ${size}px ${font}`,
-        verticalAlign: "middle",
-        textAlign: "center",
-        strokeText: stroke
-      });
+      if (localDirty) {
+        drawText({
+          textContext,
+          textCanvas,
+          fillColor,
+          strokeColor,
+          strokeSize,
+          text,
+          weight,
+          size,
+          font,
+          stroke,
+          fill,
+          offsetX,
+          offsetY
+        });
+      }
 
       context.drawImage(textCanvas, 0, 0);
     }

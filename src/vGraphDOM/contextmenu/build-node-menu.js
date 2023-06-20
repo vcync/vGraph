@@ -1,9 +1,19 @@
 import { Menu, MenuItem } from "../../nwjs-menu-browser";
 
-export default function buildNodeMenu(vGraph) {
+export function buildNodeMenu(vGraphDOM) {
   const menu = new Menu();
   const nodeGroups = {};
-  Object.values(vGraph.availableNodes)
+
+  const {
+    canvas,
+    scale,
+    dpr,
+    scaleOffsetX,
+    scaleOffsetY,
+    availableNodes
+  } = vGraphDOM;
+
+  Object.values(availableNodes)
     .sort((a, b) => a.name.localeCompare(b.name))
     .forEach(node => {
       if (!node.group) {
@@ -13,15 +23,11 @@ export default function buildNodeMenu(vGraph) {
             click: function() {
               let { x, y } = this.parentMenu.topmostMenu;
 
-              x =
-                (x * vGraph.dpr - vGraph.scaleOffsetX * vGraph.canvas.width) /
-                vGraph.scale;
+              x = (x * dpr - scaleOffsetX * canvas.width) / scale;
 
-              y =
-                (y * vGraph.dpr - vGraph.scaleOffsetY * vGraph.canvas.height) /
-                vGraph.scale;
+              y = (y * dpr - scaleOffsetY * canvas.height) / scale;
 
-              vGraph.createNode(node.name, x, y);
+              vGraphDOM.createNode(node.name, x, y);
             }
           })
         );
@@ -41,15 +47,11 @@ export default function buildNodeMenu(vGraph) {
           click: function() {
             let { x, y } = this.parentMenu.topmostMenu;
 
-            x =
-              (x * vGraph.dpr - vGraph.scaleOffsetX * vGraph.canvas.width) /
-              vGraph.scale;
+            x = (x * dpr - scaleOffsetX * canvas.width) / scale;
 
-            y =
-              (y * vGraph.dpr - vGraph.scaleOffsetY * vGraph.canvas.height) /
-              vGraph.scale;
+            y = (y * dpr - scaleOffsetY * canvas.height) / scale;
 
-            vGraph.createNode(node.name, x, y);
+            vGraphDOM.createNode(node.name, x, y);
           }
         })
       );

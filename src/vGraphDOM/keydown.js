@@ -1,7 +1,10 @@
-export default function keydown(e) {
+import { vGraphDOM } from ".";
+
+/** @this vGraphDOM */
+export function keydown(e) {
   if (
     (e.keyCode === 46 || e.keyCode === 8) &&
-    !this.widgetOverlay.contains(document.activeElement)
+    !this.widgetTransformArea.contains(document.activeElement)
   ) {
     this.deleteNode(this.focusedNodes);
   }

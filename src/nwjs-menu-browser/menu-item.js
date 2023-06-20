@@ -3,9 +3,9 @@
 import Menu from "./menu";
 import isDescendant from "./is-decendant";
 import { modifierSymbols } from "./symbols";
-const EventEmitter2 = require("eventemitter2").EventEmitter2;
+import EventEmitter from "eventemitter3";
 
-class MenuItem extends EventEmitter2 {
+class MenuItem extends EventEmitter {
   constructor(settings = {}) {
     super();
 

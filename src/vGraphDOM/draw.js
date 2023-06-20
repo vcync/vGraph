@@ -1,8 +1,8 @@
-export default function draw() {
-  if (!this._hasDom) {
-    return;
-  }
+import { vGraphDOM } from ".";
+import { drawGraphItem } from "./drawGraphItem";
 
+/** @this vGraphDOM */
+export function draw() {
   const {
     canvas: { width, height },
     colors,
@@ -19,9 +19,11 @@ export default function draw() {
   const {
     activeNodes,
     activeNodeDrawOrder,
-    activeNodeDrawOrder: { length: activeNodeDrawOrderLength },
-    hitpoints: { points }
+    activeNodeDrawOrder: { length: activeNodeDrawOrderLength }
   } = graphToEdit;
+
+  const hitpoints = this.graphHitpoints[graphToEdit.id];
+  const { points } = hitpoints;
 
   const { connectionWidth } = theme;
 
@@ -42,28 +44,27 @@ export default function draw() {
   context.save();
   context.lineCap = "round";
   context.lineWidth = connectionWidth * dpr;
-  // context.shadowColor = 'rgba(0,0,0,0.4)'
-  // context.shadowBlur = 15
 
   for (let i = 0; i < activeNodeDrawOrderLength; ++i) {
     const node = activeNodes[activeNodeDrawOrder[i]];
 
     const outputs = Object.values(node.outputs);
     for (let j = 0; j < outputs.length; ++j) {
-      const {
-        connections,
-        hitpoint: { x: x1, y: y1 },
-        type
-      } = outputs[j];
+      const { connections, type, id: outputId } = outputs[j];
+
+      const { x: x1, y: y1 } = hitpoints.points.find(
+        ({ id }) => id === outputId
+      );
 
       for (let k = 0; k < connections.length; ++k) {
         const [nodeId, inputName] = connections[k];
         const endNode = activeNodes[nodeId];
         const input = endNode.inputs[inputName];
-        const {
-          hitpoint: { x: x2, y: y2 },
-          type: endType
-        } = input;
+        const { type: endType, id: inputId } = input;
+
+        const { x: x2, y: y2 } = hitpoints.points.find(
+          ({ id }) => id === inputId
+        );
 
         let brightColor = colors[type].bright;
         let lightColor = colors[type].light;
@@ -78,13 +79,16 @@ export default function draw() {
           lightColor.addColorStop(1, colors[endType].light);
         }
 
+        const isBehindStart = x2 < x1;
+        const factor = isBehindStart ? 0.7 : 0.5;
+
         context.strokeStyle = colors[type].bright;
         context.beginPath();
         context.moveTo(x1 + 0.5, y1 + 0.5);
         context.bezierCurveTo(
-          x1 + Math.abs(x2 - x1) / 2,
+          x1 + Math.abs(x2 - x1) * factor,
           y1,
-          x2 - Math.abs(x2 - x1) / 2,
+          x2 - Math.abs(x2 - x1) * factor,
           y2,
           x2 + 0.5,
           y2 + 0.5
@@ -96,6 +100,11 @@ export default function draw() {
         context.strokeStyle = lightColor;
         context.lineWidth = connectionWidth * dpr;
         context.stroke();
+
+        if (this.debug.beziers) {
+          context.fillRect(x1 + Math.abs(x2 - x1) * factor, y1, 10, 10);
+          context.fillRect(x2 - Math.abs(x2 - x1) * factor, y2, 10, 10);
+        }
       }
     }
   }
@@ -106,15 +115,18 @@ export default function draw() {
     const x = startPoint.x;
     const y = startPoint.y;
 
+    const isBehindStart = this.inputStatus.x < x;
+    const factor = isBehindStart ? 0.7 : 0.5;
+
     context.save();
     context.lineCap = "round";
     context.lineWidth = 4 * dpr;
     context.beginPath();
     context.moveTo(x + 0.5, y + 0.5);
     context.bezierCurveTo(
-      x + Math.abs(this.inputStatus.x - x) / 2,
+      x + Math.abs(this.inputStatus.x - x) * factor,
       y,
-      this.inputStatus.x - Math.abs(this.inputStatus.x - x) / 2,
+      this.inputStatus.x - Math.abs(this.inputStatus.x - x) * factor,
       this.inputStatus.y,
       this.inputStatus.x + 0.5,
       this.inputStatus.y + 0.5
@@ -128,11 +140,38 @@ export default function draw() {
     context.lineWidth = connectionWidth * dpr;
     context.stroke();
 
+    if (this.debug.beziers) {
+      context.fillRect(
+        x + Math.abs(this.inputStatus.x - x) * factor,
+        y,
+        10,
+        10
+      );
+      context.fillRect(
+        this.inputStatus.x - Math.abs(this.inputStatus.x - x) * factor,
+        this.inputStatus.y,
+        10,
+        10
+      );
+    }
+
     context.restore();
   }
 
   for (let i = 0; i < activeNodeDrawOrderLength; ++i) {
-    activeNodes[activeNodeDrawOrder[i]].draw();
+    const { focusedNodes, startPoint, endPoint, theme, colors } = this;
+    const node = activeNodes[activeNodeDrawOrder[i]];
+    const { id, name, title, inputs, outputs } = node;
+
+    // Get the positional data from vGraphDOM
+    const { x, y, width, height } = this.activeNodes[id];
+
+    const hitpoints = this.graphHitpoints[this.graphToEdit.id];
+
+    drawGraphItem(
+      { context, dpr, focusedNodes, startPoint, endPoint, theme, colors },
+      { x, y, width, height, id, title, name, inputs, outputs, hitpoints }
+    );
   }
 
   if (this.inputStatus.action === "selectiondrawing") {
@@ -147,8 +186,8 @@ export default function draw() {
     context.stroke();
   }
 
-  this.widgetOverlay.style.transform = `scale(${scale})`;
-  const widgets = this.widgetOverlay.children;
+  this.widgetTransformArea.style.transform = `scale(${scale})`;
+  const widgets = this.widgetTransformArea.children;
   const widgetsLength = widgets.length;
 
   for (let i = 0; i < widgetsLength; ++i) {
@@ -157,27 +196,19 @@ export default function draw() {
     if (!node) {
       widget.style.display = "none";
     } else {
-      widget.style.top = `${(node.y + (scaleOffsetY * height) / scale) /
-        dpr}px`;
-      widget.style.left = `${(node.x + (scaleOffsetX * width) / scale) /
-        dpr}px`;
-      widget.style.display = "block";
+      const nodeSize = this.activeNodes[widget.id];
+      const x = (nodeSize.x + (scaleOffsetX * width) / scale) / dpr;
+      const y = (nodeSize.y + (scaleOffsetY * height) / scale) / dpr;
+
+      widget.style.transform = `translate(${x}px, ${y}px)`;
+      widget.style.display = "flex";
     }
-  }
-
-  context.fillStyle = theme.tooltip.textColor;
-
-  if (this.tooltip.length) {
-    context.fillText(
-      this.tooltip,
-      this.inputStatus.x + 16 * dpr,
-      this.inputStatus.y + 16 * dpr
-    );
   }
 
   if (this.debug.hitpoints) {
     context.strokeStyle = "red";
     context.fillStyle = "rgba(255,0,0,0.1)";
+
     points.forEach(point => {
       const { x, y, radius, x1, y1, x2, y2, type } = point;
 
@@ -197,16 +228,28 @@ export default function draw() {
 
   if (this.debug.executionOrder) {
     context.fillStyle = "#f2bd09";
-    for (let i = 0; i < activeNodeDrawOrderLength; ++i) {
-      context.fillText(
-        i,
-        activeNodes[this.activeNodesExecOrder[i]].hitpoint.x1,
-        activeNodes[this.activeNodesExecOrder[i]].hitpoint.y1
+    for (let i = 0; i < this.graphToEdit.activeNodesExecOrder.length; ++i) {
+      const nodeId = this.graphToEdit.activeNodesExecOrder[i];
+      const { x1, y1 } = this.graphHitpoints[this.graphToEdit.id].points.find(
+        ({ id }) => id === nodeId
       );
+
+      context.fillText(i, x1, y1 - 14 * dpr);
     }
   }
 
   context.restore();
+
+  context.fillStyle = theme.tooltip.textColor;
+
+  if (this.tooltip.length) {
+    context.fillText(
+      this.tooltip,
+      this.inputStatus.x * scale + 16 * dpr,
+      this.inputStatus.y * scale + 16 * dpr
+    );
+  }
+
   let graphPath = "Main ";
   let currentGraph = graphToEdit;
   while (currentGraph.parent) {

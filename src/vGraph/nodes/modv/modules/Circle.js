@@ -1,3 +1,8 @@
+import * as Types from "../../../index";
+
+/**
+ * @type {Types.NodeDefinition}
+ */
 export default {
   name: "modV/module/circle",
   group: "modV/module",

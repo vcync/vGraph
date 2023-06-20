@@ -1,6 +1,8 @@
+import { vGraphDOM } from ".";
 import isIntersectRect from "./util/is-intersect-rect";
 
-export default function interaction() {
+/** @this vGraphDOM */
+export function interaction() {
   this.inputStatus.watch(
     "mousedown",
     "(Date.now() - lastDown) < 250 && button === 0",
@@ -11,7 +13,7 @@ export default function interaction() {
   );
 
   this.inputStatus.watch("mousemove", e => {
-    const { point } = this.graphToEdit.hitpoints.hasIntersect(
+    const { point } = this.graphHitpoints[this.graphToEdit.id].hasIntersect(
       "connector",
       e.x,
       e.y
@@ -19,11 +21,17 @@ export default function interaction() {
 
     if (point) {
       this.tooltip = point.data.dataType;
-    } else {
+      this.redraw();
+      return;
+    } else if (this.tooltip) {
       this.tooltip = "";
+      this.redraw();
+      return;
     }
 
-    requestAnimationFrame(this.draw);
+    if (e.action) {
+      this.redraw();
+    }
   });
 
   this.inputStatus.watch("mousemove", 'action === "touchscaling"', e => {
@@ -59,6 +67,8 @@ export default function interaction() {
 
         this.inputStatus.x = x;
         this.inputStatus.y = y;
+
+        this.redraw();
       } else if (!e.action) {
         return "panning";
       }
@@ -66,7 +76,7 @@ export default function interaction() {
   );
 
   this.inputStatus.watch("mousedown", "!action && button === 0", e => {
-    const { point } = this.graphToEdit.hitpoints.hasIntersect(
+    const { point } = this.graphHitpoints[this.graphToEdit.id].hasIntersect(
       "connector",
       e.x,
       e.y
@@ -75,11 +85,11 @@ export default function interaction() {
     if (point && point.data.output) {
       this.startPoint = point;
       this.lineDrawing = true;
-      requestAnimationFrame(this.draw);
+      this.redraw();
       return "linedrawing";
     } else if (point && "output" in point.data && !point.data.output) {
       this.disconnect(point.data.nodeId, point.data.name);
-      requestAnimationFrame(this.draw);
+      this.redraw();
       return "disconnectnode";
     }
   });
@@ -91,7 +101,7 @@ export default function interaction() {
       const { startPoint } = this;
       this.tooltip = startPoint.data.dataType;
 
-      const { point } = this.graphToEdit.hitpoints.hasIntersect(
+      const { point } = this.graphHitpoints[this.graphToEdit.id].hasIntersect(
         "connector",
         e.x,
         e.y
@@ -107,12 +117,18 @@ export default function interaction() {
   );
 
   this.inputStatus.watch("mousedown", "!action", e => {
-    const { hitpoints, activeNodes, activeNodeDrawOrder } = this.graphToEdit;
+    const { activeNodes, activeNodeDrawOrder } = this.graphToEdit;
+    const hitpoints = this.graphHitpoints[this.graphToEdit.id];
 
     let newFocusedNode = false;
     let focusedNodeClicked = false;
 
-    const { point } = hitpoints.hasIntersect("node", e.x, e.y);
+    const { point } = this.graphHitpoints[this.graphToEdit.id].hasIntersect(
+      "node",
+      e.x,
+      e.y
+    );
+
     if (point) {
       const node = activeNodes[point.data.nodeId];
 
@@ -150,11 +166,15 @@ export default function interaction() {
       }
     }
 
-    requestAnimationFrame(this.draw);
+    this.redraw();
   });
 
   this.inputStatus.watch("mousedown", "!action", e => {
-    const { point } = this.graphToEdit.hitpoints.hasIntersect("node", e.x, e.y);
+    const { point } = this.graphHitpoints[this.graphToEdit.id].hasIntersect(
+      "node",
+      e.x,
+      e.y
+    );
 
     if (point) {
       return "nodemoving";
@@ -169,10 +189,12 @@ export default function interaction() {
 
     for (let i = 0; i < focusedNodesLength; ++i) {
       const focusedNode = focusedNodes[i];
+      const nodeSize = this.activeNodes[focusedNode.id];
+
       this.moveNode(
         focusedNode.id,
-        focusedNode.x + e.deltaX,
-        focusedNode.y + e.deltaY
+        nodeSize.x + e.deltaX,
+        nodeSize.y + e.deltaY
       );
     }
 
@@ -190,9 +212,13 @@ export default function interaction() {
 
     for (let i = 0; i < activeNodeDrawOrderLength; ++i) {
       const node = activeNodes[activeNodeDrawOrder[i]];
+      const nodeSize = this.activeNodes[node.id];
 
       const intersect = isIntersectRect(
-        { x: node.x + node.width / 2, y: node.y + node.height / 2 },
+        {
+          x: nodeSize.x + nodeSize.width / 2,
+          y: nodeSize.y + nodeSize.height / 2
+        },
         {
           x1: Math.min(e.downX, e.x),
           y1: Math.min(e.downY, e.y),
@@ -221,7 +247,7 @@ export default function interaction() {
       }
     });
 
-    requestAnimationFrame(this.draw);
+    this.redraw();
   });
 
   this.inputStatus.watch("mouseup", 'action === "linedrawing"', e => {
@@ -242,7 +268,7 @@ export default function interaction() {
     this.startPoint = false;
     this.endPoint = false;
 
-    requestAnimationFrame(this.draw);
+    this.redraw();
   });
 
   this.inputStatus.watch(
@@ -250,8 +276,8 @@ export default function interaction() {
     "metaPressed && keysDown.indexOf(65) > -1 && !vGraph.widgetOverlay.contains(document.activeElement)",
     e => {
       e.event.preventDefault();
-      this.focusedNodes = Object.values(this.graphToEdit.activeNodes);
-      requestAnimationFrame(this.draw);
+      this.focusedNodes = Object.values(this.graph.activeNodes);
+      this.redraw();
     }
   );
 }

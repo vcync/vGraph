@@ -1,4 +1,4 @@
-import uuid4 from "uuid/v4";
+import { v4 as uuidv4 } from "uuid";
 
 export default function createNode(name, x, y) {
   const existingNode = this.availableNodes.find(node => node.name === name);
@@ -7,7 +7,7 @@ export default function createNode(name, x, y) {
   }
 
   const newNode = {
-    id: uuid4(),
+    id: uuidv4(),
     inputs: {},
     outputs: {},
 
@@ -29,7 +29,7 @@ export default function createNode(name, x, y) {
       const value = existingNode.inputs[key];
 
       newNode.inputs[key] = {
-        id: uuid4(),
+        id: uuidv4(),
         label: value.label,
         type: value.type
       };

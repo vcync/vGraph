@@ -1,4 +1,4 @@
-import uuid4 from "uuid/v4";
+import { v4 as uuidv4 } from "uuid";
 
 function getInputCoords(e) {
   if (typeof e.clientX === "number") {
@@ -10,9 +10,9 @@ function getInputCoords(e) {
   }
 }
 
-export default class InputStatus {
-  constructor(vGraph, element = window) {
-    this.vGraph = vGraph;
+export class InputStatus {
+  constructor(vGraphDOM, element = window) {
+    this.vGraphDOM = vGraphDOM;
     this.element = element;
 
     this.mousedownWatchers = {};
@@ -115,7 +115,7 @@ export default class InputStatus {
   watch(event) {
     const argsLength = arguments.length;
 
-    const id = uuid4();
+    const id = uuidv4();
 
     // if (!this[`${event}Watchers`]) {
     //   this[`${event}Watchers`] = {}
@@ -143,7 +143,7 @@ export default class InputStatus {
       scale,
       scaleOffsetX,
       scaleOffsetY
-    } = this.vGraph;
+    } = this.vGraphDOM;
 
     return [
       (x * dpr - scaleOffsetX * width) / scale,

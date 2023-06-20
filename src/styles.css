@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Mono:400,400i,700,700i&display=swap');
+@import url("https://fonts.googleapis.com/css?family=IBM+Plex+Mono:400,400i,700,700i&display=swap");
 
 html,
 body {
@@ -6,7 +6,7 @@ body {
 }
 
 body {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: "IBM Plex Mono", monospace;
   position: relative;
   margin: 0;
   overscroll-behavior: none;
@@ -27,10 +27,13 @@ canvas {
   left: 0;
   width: 100%;
   height: 100%;
+}
+
+#vgraph-widgets__transform-area {
   transform-origin: top left;
 }
 
-#vgraph-widgets > * {
+#vgraph-widgets__transform-area > * {
   position: absolute;
 }
 
@@ -77,8 +80,9 @@ canvas {
 
 .nwjs-menu.menubar,
 .nwjs-menu.contextmenu {
-  background-color: rgba(51, 50, 47, 0.95);
-  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAEZklEQVRoQ8VayU7bQBiuk9IUmjalK6UL5x76DryEJRRw5CzyjXfIO3CzslgxWEh+Cd6hh94qtaV0o1viBrLRaiIGDZNZ/pkxKacQz7988++/Y13T+CsWi8v5fD7J5XKZnZ2dgYiF67o3gyA41RCjRGKxTtdqtWeNRuNQiRPjcLlcfthut7/p8nEc50UYhu+LxeJaFEXvRHyYQHQF69KVy+Xng8FgIYqit7o8rhwIUrLdbn/gKbi1tfVkd3f3kwiAbds34jgekmdKpdL9TqfzHX83A8RxnFvZbHYyD7/GSmxvb+d6vd5iEAS/UrMI5IZ0hV0lndS16MBXCeB6vZ6p1+tnGACdwUql0tNOp/MRP0fZMIqin+j/9fX16wcHB2P8TCZXCiStW2T5OeJdrVbvNZvNH+iz4zgvwzB8oyNzCoQOHB1GhjRIj780j1qt9rjRaHyhvyctiS2XmkVQwNLFsVqtrnW73cM4jieGQKfknuct+L4/YvFKDQhmjotYGoqzeFQqldutVqtHP7PooLoqBUz40kmB5IWBTS3iuu5dxRzO9GksgOUCnucVkiTJ4KxEKmPb9mIcxyeyeEUZdDgcnpCFEPOxNjc37+zt7XWhN4YqdZIkx1gwlA56TjfxWGT6gwr7X+foukTqkUqwe573wPf9YxlAsuCd141pdyujgzzHMbISBMFnCAE6Y9LGQD0AgR6NRqekC4sKprFFIIqhQO/3+0uyLpe8SDJWbNvOx3GccNLxaqvVOhIC8Txvyff9PtRS8zjH67mEQFBLH4bhn3koaCrDInO4KTMW/cbGxur+/v6RCW/RcIb1N44REwXTpL0AwitEKFB93/+NhIqWEiqFzLbtrG4jiTJmJpPJkHMM0m3GIrIZW3SLdFo24aVqLbBrqbYyMkVc11WqXTJ+YCAyRrznZJ0R1QO66svk0d1EKkDm4UKe573yff81D+AlIKIbQwxEc4HsBk2e80ZecsiycIDSWUd1Z+s4zqMwDL+aKGxCm4pr0QpA0qvM+jxQNB0eClMBwrMemhRHo9GKaGWKFObN4RALYWBKQHA7wLpx3rhMKqnqfuQFiZYaqFBfApLmIgIF6GQyOVN9raBbry6AzCOFIldBu65msznzrgMlm/F4fEYvJ3itD51BLdbModI3YT8WLc8gvo7P0F7BWvzR/FCXoBQjKgrxzpJNqIgfr3aACqKKomnGk4pcEBDoNgQxM5kecQaC1BsoSDQhas8GUCEm56BtkShGhGtRlnK6qdMEKKadAiFbaPRCplAoLA+HwzG5Y1VxuzQUQzzogBdZRylrYTfkpURR5VadN1QvQwpEtG+lhaX1QwNVEOi8FAiEqW4nC+F97mLSX2JAgVwKfFZQX+V+DLLxhAKZuTxyY8JL4ZCiydodQ0oCXce0gUDcAgKExwcnB16SmAFi8ooAK2FS5SEXAjkzY5FKpTJd00OIWWdk9Ub2vhLVjsFgkKguz7muJQswXqaCjq0ywOf9HHih8Q8TjNfRROHdzAAAAABJRU5ErkJggg==);
+  background-color: rgb(55 55 55 / 85%);
+  /* background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAEZklEQVRoQ8VayU7bQBiuk9IUmjalK6UL5x76DryEJRRw5CzyjXfIO3CzslgxWEh+Cd6hh94qtaV0o1viBrLRaiIGDZNZ/pkxKacQz7988++/Y13T+CsWi8v5fD7J5XKZnZ2dgYiF67o3gyA41RCjRGKxTtdqtWeNRuNQiRPjcLlcfthut7/p8nEc50UYhu+LxeJaFEXvRHyYQHQF69KVy+Xng8FgIYqit7o8rhwIUrLdbn/gKbi1tfVkd3f3kwiAbds34jgekmdKpdL9TqfzHX83A8RxnFvZbHYyD7/GSmxvb+d6vd5iEAS/UrMI5IZ0hV0lndS16MBXCeB6vZ6p1+tnGACdwUql0tNOp/MRP0fZMIqin+j/9fX16wcHB2P8TCZXCiStW2T5OeJdrVbvNZvNH+iz4zgvwzB8oyNzCoQOHB1GhjRIj780j1qt9rjRaHyhvyctiS2XmkVQwNLFsVqtrnW73cM4jieGQKfknuct+L4/YvFKDQhmjotYGoqzeFQqldutVqtHP7PooLoqBUz40kmB5IWBTS3iuu5dxRzO9GksgOUCnucVkiTJ4KxEKmPb9mIcxyeyeEUZdDgcnpCFEPOxNjc37+zt7XWhN4YqdZIkx1gwlA56TjfxWGT6gwr7X+foukTqkUqwe573wPf9YxlAsuCd141pdyujgzzHMbISBMFnCAE6Y9LGQD0AgR6NRqekC4sKprFFIIqhQO/3+0uyLpe8SDJWbNvOx3GccNLxaqvVOhIC8Txvyff9PtRS8zjH67mEQFBLH4bhn3koaCrDInO4KTMW/cbGxur+/v6RCW/RcIb1N44REwXTpL0AwitEKFB93/+NhIqWEiqFzLbtrG4jiTJmJpPJkHMM0m3GIrIZW3SLdFo24aVqLbBrqbYyMkVc11WqXTJ+YCAyRrznZJ0R1QO66svk0d1EKkDm4UKe573yff81D+AlIKIbQwxEc4HsBk2e80ZecsiycIDSWUd1Z+s4zqMwDL+aKGxCm4pr0QpA0qvM+jxQNB0eClMBwrMemhRHo9GKaGWKFObN4RALYWBKQHA7wLpx3rhMKqnqfuQFiZYaqFBfApLmIgIF6GQyOVN9raBbry6AzCOFIldBu65msznzrgMlm/F4fEYvJ3itD51BLdbModI3YT8WLc8gvo7P0F7BWvzR/FCXoBQjKgrxzpJNqIgfr3aACqKKomnGk4pcEBDoNgQxM5kecQaC1BsoSDQhas8GUCEm56BtkShGhGtRlnK6qdMEKKadAiFbaPRCplAoLA+HwzG5Y1VxuzQUQzzogBdZRylrYTfkpURR5VadN1QvQwpEtG+lhaX1QwNVEOi8FAiEqW4nC+F97mLSX2JAgVwKfFZQX+V+DLLxhAKZuTxyY8JL4ZCiydodQ0oCXce0gUDcAgKExwcnB16SmAFi8ooAK2FS5SEXAjkzY5FKpTJd00OIWWdk9Ub2vhLVjsFgkKguz7muJQswXqaCjq0ywOf9HHih8Q8TjNfRROHdzAAAAABJRU5ErkJggg==); */
+  backdrop-filter: blur(5px);
 }
 
 .nwjs-menu.contextmenu.menubar-submenu {
@@ -87,7 +91,7 @@ canvas {
 }
 
 .nwjs-menu.contextmenu:after {
-  content: '';
+  content: "";
   border: 1px solid rgba(255, 255, 255, 0.14);
   box-sizing: border-box;
   width: 100%;

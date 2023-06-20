@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Arimo:400,400i,700,700i');
+@import url("https://fonts.googleapis.com/css?family=Arimo:400,400i,700,700i");
 
 html,
 body {
@@ -8,8 +8,8 @@ body {
 }
 
 .nwjs-menu {
-  font-family: 'Helvetica Neue', HelveticaNeue, 'TeX Gyre Heros', TeXGyreHeros,
-    FreeSans, 'Nimbus Sans L', 'Liberation Sans', Arimo, Helvetica, Arial,
+  font-family: "Helvetica Neue", HelveticaNeue, "TeX Gyre Heros", TeXGyreHeros,
+    FreeSans, "Nimbus Sans L", "Liberation Sans", Arimo, Helvetica, Arial,
     sans-serif;
   font-size: 14px;
   color: #2c2c2c;
@@ -183,7 +183,7 @@ li.menu-item.separator {
 }
 
 .menu-item.checkbox.checked .checkmark::before {
-  content: 'â';
+  content: "✔";
   text-align: center;
   width: 100%;
 }

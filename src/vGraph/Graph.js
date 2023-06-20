@@ -1,16 +1,16 @@
+import { v4 as uuidv4 } from "uuid";
 import { makeObjectWithLength } from "./util/make-object-with-length";
 
 import { Node } from "./Node";
-import SubGraph from "./SubGraph";
-import HitPoints from "./HitPoints";
+import { SubGraph } from "./SubGraph";
 
-export default class Graph {
-  hitpoints = new HitPoints();
+export class Graph {
+  activeNodeDrawOrder = [];
+  activeNodesExecOrder = [];
 
-  constructor(vGraph) {
+  constructor(vGraph, id = uuidv4()) {
     this.vGraph = vGraph;
-    this.activeNodeDrawOrder = [];
-    this.activeNodesExecOrder = [];
+    this.id = id;
 
     this.activeNodes = new Proxy(makeObjectWithLength(), {
       set: (obj, prop, value) => {
@@ -24,43 +24,28 @@ export default class Graph {
         const index = this.activeNodeDrawOrder.indexOf(prop);
         if (index > -1) {
           this.activeNodeDrawOrder.splice(index, 1);
-          // requestAnimationFrame(this.draw)
         }
         return true;
       }
     });
   }
 
-  createNode(name, x, y, id) {
-    const existingNode = this.vGraph.availableNodes.find(
-      node => node.name === name
-    );
-    if (!existingNode) {
-      throw Error(`Cannot find a registered node with the name "${name}"`);
-    }
-
+  createNode(nodeDefinition, id) {
     let newNode;
 
-    if (existingNode.isSubgraph) {
-      newNode = new SubGraph(this, x, y, existingNode, id);
+    if (nodeDefinition.isSubgraph) {
+      newNode = new SubGraph(this, nodeDefinition, id);
       newNode.isSubgraph = true;
       newNode.graph.parent = this;
       newNode.graph.parentNode = newNode;
       newNode.graph.parentId = this.id || "top";
     } else {
-      newNode = new Node(this, x, y, existingNode, id);
+      newNode = new Node(this, nodeDefinition, id);
     }
 
     this.activeNodes[newNode.id] = newNode;
 
-    // requestAnimationFrame(this.draw)
     return newNode;
-  }
-
-  moveNode(id, x, y) {
-    const { activeNodes } = this;
-    const node = activeNodes[id];
-    node.position = [x, y];
   }
 
   connect(node1, outputName, node2, inputName) {
@@ -133,60 +118,19 @@ export default class Graph {
   }
 
   updateExecOrder() {
-    const {
-      activeNodes,
-      activeNodeDrawOrder,
-      activeNodeDrawOrder: { length: activeNodesLength }
-    } = this;
+    const activeNodesLength = this.activeNodeDrawOrder.length;
     const connected = [];
 
     for (let i = 0; i < activeNodesLength; ++i) {
-      const node = activeNodes[activeNodeDrawOrder[i]];
+      const node = this.activeNodes[this.activeNodeDrawOrder[i]];
       if (this.isConnected(node)) {
         connected.push(node);
       }
     }
 
-    const inputCheck = {};
-    const tree = [];
-
-    const traverseTree = node => {
-      const inputs = node.inputs;
-
-      if (inputs.$connected && !inputCheck[node.id]) {
-        inputCheck[node.id] = 1;
-      } else if (inputs.$connected) {
-        inputCheck[node.id] += 1;
-      }
-
-      if (
-        inputs.$length &&
-        inputs.$connected &&
-        inputCheck[node.id] < inputs.$connected
-      ) {
-        return;
-      }
-
-      tree.push(node.id);
-
-      const outputs = Object.values(node.outputs);
-
-      for (let i = 0; i < outputs.length; ++i) {
-        const outputConnections = outputs[i].connections;
-
-        for (let j = 0; j < outputConnections.length; ++j) {
-          const toNode = activeNodes[outputConnections[j][0]];
-
-          traverseTree(toNode);
-        }
-      }
-    };
-
-    connected
-      .filter(node => !node.inputs.$length)
-      .forEach(node => traverseTree(node));
-
-    this.activeNodesExecOrder = tree;
+    this.activeNodesExecOrder = connected
+      .sort((nodeB, nodeA) => nodeA.outputs.$length - nodeB.outputs.$length)
+      .map(node => node.id);
   }
 
   deleteNode(node) {
@@ -222,7 +166,6 @@ export default class Graph {
     }
 
     delete activeNodes[node.id];
-    // requestAnimationFrame(this.draw)
   }
 
   deleteNodeById(nodeId) {

@@ -3,21 +3,21 @@ import * as Types from "../../index";
 /**
  * @type {Types.NodeDefinition}
  */
-export default {
-  name: "Value Display",
+export const TextDisplay = {
+  name: "Text Display",
   group: "output",
   inputs: {
     x: {
-      type: "number",
-      default: 0
+      type: "string",
+      default: ""
     }
   },
 
   widget({ setOutput }) {
     const out = document.createElement("div");
     const input = document.createElement("input");
-    input.type = "number";
-    input.value = 0;
+    input.type = "text";
+    input.value = "";
     input.addEventListener("input", e => {
       setOutput("x", parseInt(e.target.value, 10));
     });
@@ -31,6 +31,6 @@ export default {
       return;
     }
 
-    domElement.childNodes[0].value = inputs.x.value || 0;
+    domElement.childNodes[0].value = inputs.x.value;
   }
 };
