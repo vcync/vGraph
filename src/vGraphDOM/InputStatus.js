@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { inverse, applyToPoint } from "transformation-matrix";
 
 function getInputCoords(e) {
   if (typeof e.clientX === "number") {
@@ -8,6 +9,17 @@ function getInputCoords(e) {
   if (e.touches && e.touches.length) {
     return [e.touches[0].clientX, e.touches[0].clientY];
   }
+}
+
+export function matrixFromArray(array) {
+  return {
+    a: array[0],
+    b: array[1],
+    c: array[2],
+    d: array[3],
+    e: array[4],
+    f: array[5]
+  };
 }
 
 export class InputStatus {
@@ -34,8 +46,6 @@ export class InputStatus {
     this.lastMove = -1;
     this.lastX = -1;
     this.lastY = -1;
-    this.lastUnscaledX = -1;
-    this.lastUnscaledY = -1;
 
     this.resetValues();
 
@@ -55,8 +65,6 @@ export class InputStatus {
   }
 
   resetValues() {
-    this.unscaledX = -1;
-    this.unscaledY = -1;
     this.x = -1;
     this.y = -1;
     this.deltaX = -1;
@@ -89,8 +97,6 @@ export class InputStatus {
           lastMove,
           lastX,
           lastY,
-          lastUnscaledX,
-          lastUnscaledY,
           isDown,
           isUp,
           action,
@@ -137,18 +143,9 @@ export class InputStatus {
   }
 
   scale(x, y) {
-    const {
-      dpr,
-      canvas: { width, height },
-      scale,
-      scaleOffsetX,
-      scaleOffsetY
-    } = this.vGraphDOM;
-
-    return [
-      (x * dpr - scaleOffsetX * width) / scale,
-      (y * dpr - scaleOffsetY * height) / scale
-    ];
+    const { dpr, panScale } = this.vGraphDOM;
+    let matrix = matrixFromArray(panScale.matrix);
+    return applyToPoint(inverse(matrix), [x * dpr, y * dpr]);
   }
 
   keydown(e) {
@@ -238,8 +235,6 @@ export class InputStatus {
 
     this.x = scale[0];
     this.y = scale[1];
-    this.unscaledX = input[0];
-    this.unscaledY = input[1];
 
     this.downX = this.x;
     this.downY = this.y;
@@ -253,8 +248,6 @@ export class InputStatus {
 
     this.lastX = this.x;
     this.lastY = this.y;
-    this.lastUnscaledX = this.unscaledX;
-    this.lastUnscaledY = this.unscaledY;
     this.lastDown = Date.now();
   }
 
@@ -275,8 +268,6 @@ export class InputStatus {
 
     this.x = scale[0];
     this.y = scale[1];
-    this.unscaledX = input[0];
-    this.unscaledY = input[1];
     this.deltaX = this.x - this.lastX;
     this.deltaY = this.y - this.lastY;
 
@@ -285,8 +276,6 @@ export class InputStatus {
     this.lastMove = Date.now();
     this.lastX = this.x;
     this.lastY = this.y;
-    this.lastUnscaledX = this.unscaledX;
-    this.lastUnscaledY = this.unscaledY;
   }
 
   checkDown(e) {
@@ -326,8 +315,6 @@ export class InputStatus {
             event: realEvent,
             x: this.x,
             y: this.y,
-            unscaledX: this.unscaledX,
-            unscaledY: this.unscaledY,
             deltaX: this.deltaX,
             deltaY: this.deltaY,
             downX: this.downX,
@@ -337,8 +324,6 @@ export class InputStatus {
             lastMove: this.lastMove,
             lastX: this.lastX,
             lastY: this.lastY,
-            lastUnscaledX: this.lastUnscaledX,
-            lastUnscaledY: this.lastUnscaledY,
             isDown: this.isDown,
             isUp: this.isUp,
             action: this.action,

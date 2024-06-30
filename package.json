@@ -12,6 +12,7 @@
     "eventemitter3": "^5.0.1",
     "meyda": "4.2.0",
     "randomcolor": "^0.6.2",
+    "transformation-matrix": "^2.16.1",
     "uuid": "9.0.0"
   },
   "devDependencies": {

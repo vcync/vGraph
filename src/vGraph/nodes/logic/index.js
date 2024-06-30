@@ -30,7 +30,7 @@ export default [
     },
 
     exec({ inputs, outputs }) {
-      outputs["out"].value = inputs.condition.value
+      outputs.out.value = inputs.condition.value
         ? inputs.true.value
         : inputs.false.value;
     }

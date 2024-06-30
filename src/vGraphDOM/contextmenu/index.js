@@ -14,14 +14,12 @@ export function contextmenu(e) {
 
   const input = getInputCoords(e);
 
-  this.mouseX =
-    (input[0] * dpr - this.scaleOffsetX * this.canvas.width) / this.scale;
-  this.mouseY =
-    (input[1] * dpr - this.scaleOffsetY * this.canvas.height) / this.scale;
+  this.mouseX = this.inputStatus.x;
+  this.mouseY = this.inputStatus.y;
 
   const clientCoords = {
-    x: this.mouseX,
-    y: this.mouseY
+    x: this.mouseX / dpr,
+    y: this.mouseY / dpr
   };
 
   const hitpoints = this.graphHitpoints[this.graphToEdit.id];

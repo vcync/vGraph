@@ -11,9 +11,7 @@ export function draw() {
     dpr,
     scale,
     theme,
-    graphToEdit,
-    scaleOffsetX,
-    scaleOffsetY
+    graphToEdit
   } = this;
 
   const {
@@ -38,12 +36,12 @@ export function draw() {
   context.fillStyle = theme.tooltip.textColor;
 
   context.save();
-  context.translate(scaleOffsetX * width, scaleOffsetY * height);
-  context.scale(scale, scale);
+  context.setTransform(1, 0, 0, 1, 0, 0);
+  this.panScale.apply();
 
   context.save();
   context.lineCap = "round";
-  context.lineWidth = connectionWidth * dpr;
+  context.lineWidth = connectionWidth;
 
   for (let i = 0; i < activeNodeDrawOrderLength; ++i) {
     const node = activeNodes[activeNodeDrawOrder[i]];
@@ -94,11 +92,11 @@ export function draw() {
           y2 + 0.5
         );
         context.strokeStyle = brightColor;
-        context.lineWidth = connectionWidth + 2 * dpr;
+        context.lineWidth = connectionWidth + 2;
         context.stroke();
 
         context.strokeStyle = lightColor;
-        context.lineWidth = connectionWidth * dpr;
+        context.lineWidth = connectionWidth;
         context.stroke();
 
         if (this.debug.beziers) {
@@ -115,44 +113,37 @@ export function draw() {
     const x = startPoint.x;
     const y = startPoint.y;
 
-    const isBehindStart = this.inputStatus.x < x;
+    const mouseX = this.inputStatus.x / dpr;
+    const mouseY = this.inputStatus.y / dpr;
+
+    const isBehindStart = mouseX < x;
     const factor = isBehindStart ? 0.7 : 0.5;
 
     context.save();
     context.lineCap = "round";
-    context.lineWidth = 4 * dpr;
+    context.lineWidth = 4;
     context.beginPath();
     context.moveTo(x + 0.5, y + 0.5);
     context.bezierCurveTo(
-      x + Math.abs(this.inputStatus.x - x) * factor,
+      x + Math.abs(mouseX - x) * factor,
       y,
-      this.inputStatus.x - Math.abs(this.inputStatus.x - x) * factor,
-      this.inputStatus.y,
-      this.inputStatus.x + 0.5,
-      this.inputStatus.y + 0.5
+      mouseX - Math.abs(mouseX - x) * factor,
+      mouseY,
+      mouseX + 0.5,
+      mouseY + 0.5
     );
 
     context.strokeStyle = colors[startPoint.data.dataType].bright;
-    context.lineWidth = connectionWidth + 2 * dpr;
+    context.lineWidth = connectionWidth + 2;
     context.stroke();
 
     context.strokeStyle = colors[startPoint.data.dataType].light;
-    context.lineWidth = connectionWidth * dpr;
+    context.lineWidth = connectionWidth;
     context.stroke();
 
     if (this.debug.beziers) {
-      context.fillRect(
-        x + Math.abs(this.inputStatus.x - x) * factor,
-        y,
-        10,
-        10
-      );
-      context.fillRect(
-        this.inputStatus.x - Math.abs(this.inputStatus.x - x) * factor,
-        this.inputStatus.y,
-        10,
-        10
-      );
+      context.fillRect(x + Math.abs(mouseX - x) * factor, y, 10, 10);
+      context.fillRect(mouseX - Math.abs(mouseX - x) * factor, mouseY, 10, 10);
     }
 
     context.restore();
@@ -175,18 +166,22 @@ export function draw() {
   }
 
   if (this.inputStatus.action === "selectiondrawing") {
-    context.lineWidth = (1 * dpr) / scale;
+    context.lineWidth = 1 / scale;
     context.beginPath();
     context.rect(
-      this.inputStatus.downX + 0.5,
-      this.inputStatus.downY + 0.5,
-      this.inputStatus.x - this.inputStatus.downX,
-      this.inputStatus.y - this.inputStatus.downY
+      this.inputStatus.downX / dpr + 0.5,
+      this.inputStatus.downY / dpr + 0.5,
+      this.inputStatus.x / dpr - this.inputStatus.downX / dpr,
+      this.inputStatus.y / dpr - this.inputStatus.downY / dpr
     );
     context.stroke();
   }
 
-  this.widgetTransformArea.style.transform = `scale(${scale})`;
+  const m = this.panScale.matrix;
+  this.widgetTransformArea.style.transform = `matrix(${m[0]},${m[1]},${m[2]},${
+    m[3]
+  },${m[4] / dpr},${m[5] / dpr})`;
+
   const widgets = this.widgetTransformArea.children;
   const widgetsLength = widgets.length;
 
@@ -197,10 +192,10 @@ export function draw() {
       widget.style.display = "none";
     } else {
       const nodeSize = this.activeNodes[widget.id];
-      const x = (nodeSize.x + (scaleOffsetX * width) / scale) / dpr;
-      const y = (nodeSize.y + (scaleOffsetY * height) / scale) / dpr;
+      const x = nodeSize.x / dpr;
+      const y = nodeSize.y / dpr;
 
-      widget.style.transform = `translate(${x}px, ${y}px)`;
+      widget.style.transform = `translate(${x * dpr}px, ${y * dpr}px)`;
       widget.style.display = "flex";
     }
   }
@@ -234,7 +229,7 @@ export function draw() {
         ({ id }) => id === nodeId
       );
 
-      context.fillText(i, x1, y1 - 14 * dpr);
+      context.fillText(i, x1, y1 - 14);
     }
   }
 
@@ -245,8 +240,8 @@ export function draw() {
   if (this.tooltip.length) {
     context.fillText(
       this.tooltip,
-      this.inputStatus.x * scale + 16 * dpr,
-      this.inputStatus.y * scale + 16 * dpr
+      (this.inputStatus.x / dpr) * scale + 16,
+      (this.inputStatus.y / dpr) * scale + 16
     );
   }
 
@@ -257,5 +252,5 @@ export function draw() {
     currentGraph = currentGraph.parent;
   }
 
-  context.fillText(`Path: ${graphPath}`, 10 * dpr, 42 * dpr, width);
+  context.fillText(`Path: ${graphPath}`, 10, 42, width);
 }

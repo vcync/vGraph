@@ -2,13 +2,13 @@ import { vGraphDOM } from ".";
 
 /** @this vGraphDOM */
 export function dblclick(e) {
-  const { graphToEdit } = this;
+  const { dpr, graphToEdit } = this;
   const hitpoints = this.graphHitpoints[graphToEdit.id];
 
   const { point } = hitpoints.hasIntersect(
     "node",
-    this.inputStatus.lastX,
-    this.inputStatus.lastY
+    this.inputStatus.lastX / dpr,
+    this.inputStatus.lastY / dpr
   );
 
   const { activeNodes } = graphToEdit;

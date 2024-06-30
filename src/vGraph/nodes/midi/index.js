@@ -33,20 +33,22 @@ function handleStateChange(access) {
   }
 }
 
-navigator.requestMIDIAccess({ sysex: false }).then(access => {
-  // Get lists of available MIDI controllers
-  inputs = [...access.inputs.values()];
-  outputs = [...access.outputs.values()];
+if (navigator?.requestMIDIAccess) {
+  navigator.requestMIDIAccess({ sysex: false }).then(access => {
+    // Get lists of available MIDI controllers
+    inputs = [...access.inputs.values()];
+    outputs = [...access.outputs.values()];
 
-  handleStateChange(access);
+    handleStateChange(access);
 
-  access.onstatechange = event => {
-    handleStateChange(event.currentTarget);
+    access.onstatechange = event => {
+      handleStateChange(event.currentTarget);
 
-    // Print information about the (dis)connected MIDI controller
-    console.log(event.port.name, event.port.manufacturer, event.port.state);
-  };
-});
+      // Print information about the (dis)connected MIDI controller
+      console.log(event.port.name, event.port.manufacturer, event.port.state);
+    };
+  });
+}
 
 /**
  * @type {Types.NodeDefinition[]}

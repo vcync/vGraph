@@ -5,6 +5,7 @@ export function resize() {
   const { canvas } = this;
   const { devicePixelRatio: dpr, innerWidth, innerHeight } = window;
   this.dpr = dpr;
+  this.context.dpr = dpr;
   canvas.width = innerWidth * dpr;
   canvas.height = innerHeight * dpr;
 

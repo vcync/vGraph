@@ -1,3 +1,5 @@
+import { HighResCanvas2D } from "../../HighResCanvas";
+
 export function createCanvas(
   width = 128,
   height = 128,
@@ -12,5 +14,10 @@ export function createCanvas(
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
+
+  if (type === "2d") {
+    return new HighResCanvas2D(canvas.getContext(type, options));
+  }
+
   return canvas.getContext(type, options);
 }

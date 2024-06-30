@@ -13,10 +13,11 @@ export function interaction() {
   );
 
   this.inputStatus.watch("mousemove", e => {
+    const { dpr } = this;
     const { point } = this.graphHitpoints[this.graphToEdit.id].hasIntersect(
       "connector",
-      e.x,
-      e.y
+      e.x / dpr,
+      e.y / dpr
     );
 
     if (point) {
@@ -53,20 +54,10 @@ export function interaction() {
     "(button === 0 && isDown && shiftPressed) || (button === 1 && isDown)",
     e => {
       if (e.action === "panning") {
-        const {
-          dpr,
-          canvas: { width, height },
-          scale
-        } = this;
-
-        this.scaleOffsetX += (e.deltaX / width) * scale;
-        this.scaleOffsetY += (e.deltaY / height) * scale;
-
-        const x = (e.unscaledX * dpr - this.scaleOffsetX * width) / scale;
-        const y = (e.unscaledY * dpr - this.scaleOffsetY * height) / scale;
-
-        this.inputStatus.x = x;
-        this.inputStatus.y = y;
+        this.panScale.pan({
+          x: this.inputStatus.x - this.inputStatus.downX,
+          y: this.inputStatus.y - this.inputStatus.downY
+        });
 
         this.redraw();
       } else if (!e.action) {
@@ -76,10 +67,12 @@ export function interaction() {
   );
 
   this.inputStatus.watch("mousedown", "!action && button === 0", e => {
+    const { dpr } = this;
+
     const { point } = this.graphHitpoints[this.graphToEdit.id].hasIntersect(
       "connector",
-      e.x,
-      e.y
+      e.x / dpr,
+      e.y / dpr
     );
 
     if (point && point.data.output) {
@@ -98,13 +91,13 @@ export function interaction() {
     "mousemove",
     'action === "linedrawing" && isDown',
     e => {
-      const { startPoint } = this;
+      const { dpr, startPoint } = this;
       this.tooltip = startPoint.data.dataType;
 
       const { point } = this.graphHitpoints[this.graphToEdit.id].hasIntersect(
         "connector",
-        e.x,
-        e.y
+        e.x / dpr,
+        e.y / dpr
       );
 
       if (startPoint && point && point.data.nodeId !== startPoint.data.nodeId) {
@@ -117,6 +110,7 @@ export function interaction() {
   );
 
   this.inputStatus.watch("mousedown", "!action", e => {
+    const { dpr } = this;
     const { activeNodes, activeNodeDrawOrder } = this.graphToEdit;
     const hitpoints = this.graphHitpoints[this.graphToEdit.id];
 
@@ -125,8 +119,8 @@ export function interaction() {
 
     const { point } = this.graphHitpoints[this.graphToEdit.id].hasIntersect(
       "node",
-      e.x,
-      e.y
+      e.x / dpr,
+      e.y / dpr
     );
 
     if (point) {
@@ -170,10 +164,12 @@ export function interaction() {
   });
 
   this.inputStatus.watch("mousedown", "!action", e => {
+    const { dpr } = this;
+
     const { point } = this.graphHitpoints[this.graphToEdit.id].hasIntersect(
       "node",
-      e.x,
-      e.y
+      e.x / dpr,
+      e.y / dpr
     );
 
     if (point) {
@@ -183,6 +179,7 @@ export function interaction() {
 
   this.inputStatus.watch("mousemove", 'action === "nodemoving"', e => {
     const {
+      dpr,
       focusedNodes,
       focusedNodes: { length: focusedNodesLength }
     } = this;
@@ -193,8 +190,8 @@ export function interaction() {
 
       this.moveNode(
         focusedNode.id,
-        nodeSize.x + e.deltaX,
-        nodeSize.y + e.deltaY
+        nodeSize.x + e.deltaX / dpr,
+        nodeSize.y + e.deltaY / dpr
       );
     }
 
@@ -202,6 +199,7 @@ export function interaction() {
   });
 
   this.inputStatus.watch("mouseup", 'action === "selectiondrawing"', e => {
+    const { dpr } = this;
     const {
       activeNodes,
       activeNodeDrawOrder,
@@ -220,10 +218,10 @@ export function interaction() {
           y: nodeSize.y + nodeSize.height / 2
         },
         {
-          x1: Math.min(e.downX, e.x),
-          y1: Math.min(e.downY, e.y),
-          x2: Math.max(e.downX, e.x),
-          y2: Math.max(e.downY, e.y)
+          x1: Math.min(e.downX / dpr, e.x / dpr),
+          y1: Math.min(e.downY / dpr, e.y / dpr),
+          x2: Math.max(e.downX / dpr, e.x / dpr),
+          y2: Math.max(e.downY / dpr, e.y / dpr)
         }
       );
 

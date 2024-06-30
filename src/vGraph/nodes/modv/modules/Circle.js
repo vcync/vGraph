@@ -34,7 +34,7 @@ export default {
     context: {
       type: "renderContext",
       connectionRequired: true,
-      deafult: undefined
+      default: undefined
     }
   },
   exec({ inputs, outputs }) {

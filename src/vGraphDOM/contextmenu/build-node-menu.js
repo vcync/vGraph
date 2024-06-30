@@ -1,17 +1,16 @@
+import { vGraphDOM } from "..";
 import { Menu, MenuItem } from "../../nwjs-menu-browser";
 
+/**
+ *
+ * @param {vGraphDOM} vGraphDOM
+ * @returns
+ */
 export function buildNodeMenu(vGraphDOM) {
   const menu = new Menu();
   const nodeGroups = {};
 
-  const {
-    canvas,
-    scale,
-    dpr,
-    scaleOffsetX,
-    scaleOffsetY,
-    availableNodes
-  } = vGraphDOM;
+  const { dpr, availableNodes } = vGraphDOM;
 
   Object.values(availableNodes)
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -21,13 +20,10 @@ export function buildNodeMenu(vGraphDOM) {
           new MenuItem({
             label: node.name,
             click: function() {
-              let { x, y } = this.parentMenu.topmostMenu;
+              const { x, y } = this.parentMenu.topmostMenu;
+              const [x2, y2] = vGraphDOM.inputStatus.scale(x, y);
 
-              x = (x * dpr - scaleOffsetX * canvas.width) / scale;
-
-              y = (y * dpr - scaleOffsetY * canvas.height) / scale;
-
-              vGraphDOM.createNode(node.name, x, y);
+              vGraphDOM.createNode(node.name, x2 / dpr, y2 / dpr);
             }
           })
         );
@@ -46,12 +42,9 @@ export function buildNodeMenu(vGraphDOM) {
           label: node.name,
           click: function() {
             let { x, y } = this.parentMenu.topmostMenu;
+            const [x2, y2] = vGraphDOM.inputStatus.scale(x, y);
 
-            x = (x * dpr - scaleOffsetX * canvas.width) / scale;
-
-            y = (y * dpr - scaleOffsetY * canvas.height) / scale;
-
-            vGraphDOM.createNode(node.name, x, y);
+            vGraphDOM.createNode(node.name, x2 / dpr, y2 / dpr);
           }
         })
       );

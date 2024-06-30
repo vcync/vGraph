@@ -37,11 +37,12 @@ export const drawGraphItem = (
   // context.shadowColor = "rgba(0,0,0,0.4)";
   // context.shadowBlur = 4;
 
-  context.roundedRect(x, y, width * dpr, height * dpr, borderRadius * dpr);
+  context.beginPath();
+  context.roundRect(x, y, width, height, borderRadius);
 
   if (outlineWidth && outlineColor) {
     context.strokeStyle = outlineColor;
-    context.lineWidth = outlineWidth * dpr;
+    context.lineWidth = outlineWidth;
     context.stroke();
   }
 
@@ -49,7 +50,7 @@ export const drawGraphItem = (
   if (nodeFocused) {
     context.fillStyle = focusedTitleColor;
     context.strokeStyle = focusedOutlineColor;
-    context.lineWidth = focusedOutlineWidth * dpr;
+    context.lineWidth = focusedOutlineWidth;
     context.stroke();
   } else {
     context.fillStyle = titleColor;
@@ -88,14 +89,15 @@ export const drawGraphItem = (
         startPoint.data.dataType === input.type)
     ) {
       context.strokeStyle = colors[input.type].dark;
-      context.lineWidth = connectorFocusedOutlineWidth * dpr;
+      context.lineWidth = connectorFocusedOutlineWidth;
     } else {
       context.strokeStyle = connectorOutlineColor;
-      context.lineWidth = connectorOutlineWidth * dpr;
+      context.lineWidth = connectorOutlineWidth;
     }
 
     context.beginPath();
-    context.arc(x, y, connectorRadius * dpr, 0, Math.PI * 2);
+    context.arc(x, y, connectorRadius, 0, Math.PI * 2);
+    context.closePath();
     context.fill();
     context.stroke();
 
@@ -107,7 +109,7 @@ export const drawGraphItem = (
     } else {
       context.fillStyle = textColor;
     }
-    context.fillText(name, x + dpr * connectorRadius * 1.5 + 0.5, y + 0.5);
+    context.fillText(name, x + connectorRadius * 1.5 + 0.5, y + 0.5);
   }
 
   const outputsKeys = Object.keys(outputs);
@@ -126,15 +128,15 @@ export const drawGraphItem = (
     }
 
     if (startPoint && output.id === startPoint.data.connectorId) {
-      context.lineWidth = connectorFocusedOutlineWidth * dpr;
+      context.lineWidth = connectorFocusedOutlineWidth;
       context.strokeStyle = colors[output.type].dark;
     } else {
       context.strokeStyle = connectorOutlineColor;
-      context.lineWidth = connectorOutlineWidth * dpr;
+      context.lineWidth = connectorOutlineWidth;
     }
 
     context.beginPath();
-    context.arc(x, y, connectorRadius * dpr, 0, Math.PI * 2);
+    context.arc(x, y, connectorRadius, 0, Math.PI * 2);
     context.fill();
     context.stroke();
 
@@ -146,7 +148,7 @@ export const drawGraphItem = (
     } else {
       context.fillStyle = textColor;
     }
-    context.fillText(name, x - dpr * connectorRadius * 1.5 + 0.5, y + 0.5);
+    context.fillText(name, x - connectorRadius * 1.5 + 0.5, y + 0.5);
   }
 
   context.restore();
